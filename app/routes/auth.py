@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app as app
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
@@ -21,14 +21,19 @@ def login():
         return redirect(url_for('songs.index'))
 
     form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(username=form.username.data).first()
-        if user and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
-            flash(f'¡Bienvenida de vuelta, {user.username}! 🎵', 'success')
-            return redirect(next_page or url_for('songs.index'))
-        flash('Usuario o contraseña incorrectos.', 'error')
+    try:
+        if form.validate_on_submit():
+            user = User.query.filter_by(username=form.username.data).first()
+            if user and user.check_password(form.password.data):
+                login_user(user, remember=form.remember_me.data)
+                next_page = request.args.get('next')
+                flash(f'¡Bienvenida de vuelta, {user.username}! 🎵', 'success')
+                return redirect(next_page or url_for('songs.index'))
+            flash('Usuario o contraseña incorrectos.', 'error')
+    except Exception as e:
+        import traceback
+        app.logger.error(traceback.format_exc())
+        return f'<pre>{traceback.format_exc()}</pre>', 500
 
     return render_template('auth/login.html', form=form)
 
