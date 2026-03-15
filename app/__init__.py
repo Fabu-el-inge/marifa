@@ -45,6 +45,14 @@ def create_app(config_name=None):
             return redirect(url_for('songs.index'))
         return redirect(url_for('auth.login'))
 
+    @app.after_request
+    def add_no_cache(response):
+        if 'text/html' in response.content_type:
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+        return response
+
     @app.route('/health')
     def health():
         return 'ok', 200
