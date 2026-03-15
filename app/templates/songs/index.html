@@ -449,8 +449,8 @@ function openLyricsModal(id) {
   let metaHtml = '';
   if (s.genre)    metaHtml += `<span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">${s.genre}</span>`;
   if (s.key)      metaHtml += `<span class="text-xs font-bold" style="color:#d97706;"><i class="fas fa-key mr-1"></i>${s.key}</span>`;
-  if (s.bpm)      metaHtml += `<span class="text-xs text-gray-500">${s.bpm} BPM</span>`;
-  if (s.duration) metaHtml += `<span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${s.duration}</span>`;
+  metaHtml += `<span class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="editBpm()" title="Clic para editar BPM"><i class="fas fa-heartbeat mr-1"></i><span id="modal-bpm-display">${s.bpm ? s.bpm + ' BPM' : 'Sin BPM'}</span></span>`;
+  metaHtml += `<span class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="editDuration()" title="Clic para editar duración"><i class="fas fa-clock mr-1"></i><span id="modal-dur-display">${s.duration || 'Sin duración'}</span></span>`;
   metaEl.innerHTML = metaHtml;
 
   // Guardar song ID para grabación
@@ -652,6 +652,50 @@ function closeLyricsModal() {
 }
 
 let _lyricsExpanded = false;
+function editBpm() {
+  var current = songs[_modalSongId] ? songs[_modalSongId].bpm : '';
+  var val = prompt('BPM:', current || '');
+  if (val === null) return;
+  var bpm = val.trim() === '' ? null : parseInt(val);
+  if (bpm !== null && (isNaN(bpm) || bpm < 1 || bpm > 400)) { alert('BPM debe ser entre 1 y 400'); return; }
+  fetch('/songs/' + _modalSongId + '/quick-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ bpm: bpm })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.ok) {
+      document.getElementById('modal-bpm-display').textContent = d.bpm ? d.bpm + ' BPM' : 'Sin BPM';
+      if (songs[_modalSongId]) songs[_modalSongId].bpm = d.bpm;
+    }
+  });
+}
+
+function editDuration() {
+  var current = songs[_modalSongId] ? songs[_modalSongId].duration : '';
+  var val = prompt('Duración (mm:ss):', current || '');
+  if (val === null) return;
+  var secs = null;
+  if (val.trim() !== '') {
+    var parts = val.trim().split(':');
+    if (parts.length === 2) {
+      secs = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+    } else if (parts.length === 1) {
+      secs = parseInt(parts[0]) * 60;
+    }
+    if (isNaN(secs) || secs < 0) { alert('Formato: mm:ss (ej: 3:45)'); return; }
+  }
+  fetch('/songs/' + _modalSongId + '/quick-update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ duration_sec: secs })
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.ok) {
+      document.getElementById('modal-dur-display').textContent = d.duration_display || 'Sin duración';
+      if (songs[_modalSongId]) songs[_modalSongId].duration = d.duration_display;
+    }
+  });
+}
+
 function downloadRecording() {
   var url = document.getElementById('modal-audio').src;
   if (!url) return;

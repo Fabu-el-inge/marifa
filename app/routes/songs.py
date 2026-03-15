@@ -491,6 +491,22 @@ def fetch_lyrics():
     return jsonify({'error': 'No se encontró la letra. Podés escribirla manualmente.'}), 404
 
 
+@songs_bp.route('/<int:song_id>/quick-update', methods=['POST'])
+@login_required
+def quick_update(song_id):
+    """Actualiza BPM y/o duración desde el modal."""
+    song = Song.query.filter_by(id=song_id, user_id=current_user.id, is_active=True).first_or_404()
+    data = request.get_json()
+    if 'bpm' in data:
+        val = data['bpm']
+        song.bpm = int(val) if val else None
+    if 'duration_sec' in data:
+        val = data['duration_sec']
+        song.duration_sec = int(val) if val else None
+    db.session.commit()
+    return jsonify({'ok': True, 'bpm': song.bpm, 'duration_display': song.duration_display})
+
+
 @songs_bp.route('/reorder', methods=['POST'])
 @login_required
 def reorder():
