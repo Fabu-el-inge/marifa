@@ -465,9 +465,13 @@ function openLyricsModal(id) {
   if (s.recordingUrl) {
     document.getElementById('modal-rec-existing-audio').src = s.recordingUrl;
     document.getElementById('modal-rec-existing').style.display = 'block';
+    document.getElementById('modal-rec-toggle').style.display = 'none';
+    document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
   } else {
     document.getElementById('modal-rec-existing-audio').src = '';
     document.getElementById('modal-rec-existing').style.display = 'none';
+    document.getElementById('modal-rec-toggle').style.display = 'flex';
+    document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
   }
 
   // Resetear notación de acordes al abrir
@@ -587,7 +591,8 @@ function saveModalRecording() {
       document.getElementById('modal-rec-existing-audio').src = d.url;
       document.getElementById('modal-rec-existing').style.display = 'block';
       document.getElementById('modal-rec-new').style.display = 'none';
-      document.getElementById('modal-rec-hint').textContent = 'Grabación guardada.';
+      document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
+      document.getElementById('modal-rec-toggle').style.display = 'none';
       // Actualizar reproductor principal y datos
       document.getElementById('modal-audio').src = d.url;
       document.getElementById('modal-recording').style.display = 'block';
@@ -613,6 +618,7 @@ function deleteModalRecording() {
       document.getElementById('modal-rec-existing-audio').src = '';
       document.getElementById('modal-rec-existing').style.display = 'none';
       document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+      document.getElementById('modal-rec-toggle').style.display = 'flex';
       document.getElementById('modal-audio').src = '';
       document.getElementById('modal-recording').style.display = 'none';
       if (songs[_modalSongId]) songs[_modalSongId].recordingUrl = '';
