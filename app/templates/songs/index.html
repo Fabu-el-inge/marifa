@@ -596,7 +596,7 @@ function saveModalRecording() {
       // Actualizar reproductor principal y datos
       document.getElementById('modal-audio').src = d.url;
       document.getElementById('modal-recording').style.display = 'block';
-      if (songs[_modalSongId]) songs[_modalSongId].recordingUrl = d.url;
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = d.url;
       _modalBlob = null;
     }
   });
@@ -621,7 +621,7 @@ function deleteModalRecording() {
       document.getElementById('modal-rec-toggle').style.display = 'flex';
       document.getElementById('modal-audio').src = '';
       document.getElementById('modal-recording').style.display = 'none';
-      if (songs[_modalSongId]) songs[_modalSongId].recordingUrl = '';
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = '';
     }
   });
 }
@@ -653,7 +653,7 @@ function closeLyricsModal() {
 
 let _lyricsExpanded = false;
 function editBpm() {
-  var current = songs[_modalSongId] ? songs[_modalSongId].bpm : '';
+  var current = SONGS_DATA[_modalSongId] ? SONGS_DATA[_modalSongId].bpm : '';
   var val = prompt('BPM:', current || '');
   if (val === null) return;
   var bpm = val.trim() === '' ? null : parseInt(val);
@@ -665,13 +665,13 @@ function editBpm() {
   }).then(function(r) { return r.json(); }).then(function(d) {
     if (d.ok) {
       document.getElementById('modal-bpm-display').textContent = d.bpm ? d.bpm + ' BPM' : 'Sin BPM';
-      if (songs[_modalSongId]) songs[_modalSongId].bpm = d.bpm;
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].bpm = d.bpm;
     }
   });
 }
 
 function editDuration() {
-  var current = songs[_modalSongId] ? songs[_modalSongId].duration : '';
+  var current = SONGS_DATA[_modalSongId] ? SONGS_DATA[_modalSongId].duration : '';
   var val = prompt('Duración (mm:ss):', current || '');
   if (val === null) return;
   var secs = null;
@@ -691,7 +691,7 @@ function editDuration() {
   }).then(function(r) { return r.json(); }).then(function(d) {
     if (d.ok) {
       document.getElementById('modal-dur-display').textContent = d.duration_display || 'Sin duración';
-      if (songs[_modalSongId]) songs[_modalSongId].duration = d.duration_display;
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].duration = d.duration_display;
     }
   });
 }
