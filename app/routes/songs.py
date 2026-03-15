@@ -4,7 +4,7 @@ import json
 import re
 import os
 import time
-from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_from_directory
+from flask import Blueprint, render_template, redirect, url_for, flash, request, jsonify, send_from_directory, current_app
 from flask_login import login_required, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, IntegerField, TextAreaField, BooleanField
@@ -17,9 +17,57 @@ songs_bp = Blueprint('songs', __name__)
 RECORDINGS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'static', 'recordings')
 ALLOWED_AUDIO = {'webm', 'ogg', 'mp3', 'wav', 'm4a', 'opus', 'mp4'}
 
+SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '')
+USE_SUPABASE_STORAGE = bool(SUPABASE_URL and SUPABASE_SERVICE_KEY)
+
+
+def _save_recording_supabase(file_obj, old_path=None):
+    """Sube grabación a Supabase Storage."""
+    raw_name = file_obj.filename or ''
+    ext = raw_name.rsplit('.', 1)[-1].lower() if '.' in raw_name else 'webm'
+    if ext not in ALLOWED_AUDIO:
+        ext = 'webm'
+    filename = f"rec_{int(time.time() * 1000)}.{ext}"
+
+    data = file_obj.read()
+    content_type = file_obj.content_type or 'audio/webm'
+
+    req = urllib.request.Request(
+        f"{SUPABASE_URL}/storage/v1/object/recordings/{filename}",
+        data=data,
+        headers={
+            'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+            'apikey': SUPABASE_SERVICE_KEY,
+            'Content-Type': content_type,
+        },
+        method='POST'
+    )
+    urllib.request.urlopen(req, timeout=30)
+
+    # Borrar archivo anterior si existe
+    if old_path:
+        try:
+            del_req = urllib.request.Request(
+                f"{SUPABASE_URL}/storage/v1/object/recordings/{old_path}",
+                headers={
+                    'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+                    'apikey': SUPABASE_SERVICE_KEY,
+                },
+                method='DELETE'
+            )
+            urllib.request.urlopen(del_req, timeout=10)
+        except Exception:
+            pass
+
+    return filename
+
 
 def _save_recording(file_obj, old_path=None):
-    """Guarda el archivo de grabación y retorna el nombre del archivo."""
+    """Guarda el archivo de grabación."""
+    if USE_SUPABASE_STORAGE:
+        return _save_recording_supabase(file_obj, old_path)
+
     os.makedirs(RECORDINGS_DIR, exist_ok=True)
     raw_name = file_obj.filename or ''
     ext = raw_name.rsplit('.', 1)[-1].lower() if '.' in raw_name else 'webm'
@@ -193,6 +241,8 @@ def print_song(song_id):
 def serve_recording(filename):
     """Sirve archivos de grabación (solo al dueño de la canción)."""
     song = Song.query.filter_by(recording_path=filename, user_id=current_user.id).first_or_404()
+    if USE_SUPABASE_STORAGE:
+        return redirect(f'{SUPABASE_URL}/storage/v1/object/public/recordings/{song.recording_path}')
     return send_from_directory(RECORDINGS_DIR, song.recording_path)
 
 
@@ -205,7 +255,11 @@ def save_recording(song_id):
         return jsonify({'error': 'No se recibió archivo.'}), 400
     song.recording_path = _save_recording(rec_file, old_path=song.recording_path)
     db.session.commit()
-    return jsonify({'ok': True, 'url': url_for('songs.serve_recording', filename=song.recording_path)})
+    if USE_SUPABASE_STORAGE:
+        rec_url = f'{SUPABASE_URL}/storage/v1/object/public/recordings/{song.recording_path}'
+    else:
+        rec_url = url_for('songs.serve_recording', filename=song.recording_path)
+    return jsonify({'ok': True, 'url': rec_url})
 
 
 @songs_bp.route('/<int:song_id>/delete-recording', methods=['POST'])
@@ -213,9 +267,23 @@ def save_recording(song_id):
 def delete_recording(song_id):
     song = Song.query.filter_by(id=song_id, user_id=current_user.id, is_active=True).first_or_404()
     if song.recording_path:
-        full_path = os.path.join(RECORDINGS_DIR, song.recording_path)
-        if os.path.exists(full_path):
-            os.remove(full_path)
+        if USE_SUPABASE_STORAGE:
+            try:
+                del_req = urllib.request.Request(
+                    f"{SUPABASE_URL}/storage/v1/object/recordings/{song.recording_path}",
+                    headers={
+                        'Authorization': f'Bearer {SUPABASE_SERVICE_KEY}',
+                        'apikey': SUPABASE_SERVICE_KEY,
+                    },
+                    method='DELETE'
+                )
+                urllib.request.urlopen(del_req, timeout=10)
+            except Exception:
+                pass
+        else:
+            full_path = os.path.join(RECORDINGS_DIR, song.recording_path)
+            if os.path.exists(full_path):
+                os.remove(full_path)
         song.recording_path = None
         db.session.commit()
     return jsonify({'ok': True})

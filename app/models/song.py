@@ -51,6 +51,10 @@ class Song(db.Model):
     def recording_url(self):
         if not self.recording_path:
             return None
+        import os
+        supabase_url = os.environ.get('SUPABASE_URL', '')
+        if supabase_url:
+            return f'{supabase_url}/storage/v1/object/public/recordings/{self.recording_path}'
         return f'/songs/recordings/{self.recording_path}'
 
     @property
