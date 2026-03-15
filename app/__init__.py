@@ -45,4 +45,22 @@ def create_app(config_name=None):
             return redirect(url_for('songs.index'))
         return redirect(url_for('auth.login'))
 
+    @app.route('/health')
+    def health():
+        return 'ok', 200
+
+    # Keep-alive: evita que Render free tier duerma la app
+    if config_name == 'production':
+        import threading, urllib.request as _ur
+        def _keep_alive():
+            import time
+            while True:
+                time.sleep(840)  # 14 minutos
+                try:
+                    _ur.urlopen('https://marifa.onrender.com/health', timeout=10)
+                except Exception:
+                    pass
+        t = threading.Thread(target=_keep_alive, daemon=True)
+        t.start()
+
     return app
