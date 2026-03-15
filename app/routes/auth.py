@@ -28,7 +28,7 @@ def login():
                 login_user(user, remember=form.remember_me.data)
                 next_page = request.args.get('next')
                 flash(f'¡Bienvenida de vuelta, {user.username}! 🎵', 'success')
-                return redirect(next_page or url_for('songs.index'))
+                return redirect(next_page or url_for('songs.index', _v=7))
             flash('Usuario o contraseña incorrectos.', 'error')
     except Exception as e:
         import traceback

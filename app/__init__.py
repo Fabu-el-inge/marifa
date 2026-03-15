@@ -42,7 +42,7 @@ def create_app(config_name=None):
     @app.route('/')
     def index():
         if current_user.is_authenticated:
-            return redirect(url_for('songs.index'))
+            return redirect(url_for('songs.index', _v=7))
         return redirect(url_for('auth.login'))
 
     @app.after_request
