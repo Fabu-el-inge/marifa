@@ -588,6 +588,10 @@ function saveModalRecording() {
       document.getElementById('modal-rec-existing').style.display = 'block';
       document.getElementById('modal-rec-new').style.display = 'none';
       document.getElementById('modal-rec-hint').textContent = 'Grabación guardada.';
+      // Actualizar reproductor principal y datos
+      document.getElementById('modal-audio').src = d.url;
+      document.getElementById('modal-recording').style.display = 'block';
+      if (songs[_modalSongId]) songs[_modalSongId].recordingUrl = d.url;
       _modalBlob = null;
     }
   });
@@ -609,6 +613,9 @@ function deleteModalRecording() {
       document.getElementById('modal-rec-existing-audio').src = '';
       document.getElementById('modal-rec-existing').style.display = 'none';
       document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+      document.getElementById('modal-audio').src = '';
+      document.getElementById('modal-recording').style.display = 'none';
+      if (songs[_modalSongId]) songs[_modalSongId].recordingUrl = '';
     }
   });
 }
