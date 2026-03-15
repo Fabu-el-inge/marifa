@@ -130,6 +130,9 @@
           <i class="fas fa-microphone mr-1"></i>Grabación de referencia
         </p>
         <audio id="modal-audio" controls class="w-full" style="height:36px;"></audio>
+        <a id="modal-audio-download" href="#" download class="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 mt-2">
+          <i class="fas fa-download"></i> Descargar audio
+        </a>
       </div>
       <div id="modal-no-lyrics" class="text-center py-8 text-gray-400" style="display:none;">
         <i class="fas fa-music text-2xl mb-2 block opacity-30"></i>
@@ -499,11 +502,14 @@ function openLyricsModal(id) {
   // Grabación de referencia
   const recEl   = document.getElementById('modal-recording');
   const audioEl = document.getElementById('modal-audio');
+  var dlLink = document.getElementById('modal-audio-download');
   if (s.recordingUrl) {
     audioEl.src = s.recordingUrl;
+    dlLink.href = s.recordingUrl;
     recEl.style.display = 'block';
   } else {
     audioEl.src = '';
+    dlLink.href = '#';
     recEl.style.display = 'none';
   }
 
