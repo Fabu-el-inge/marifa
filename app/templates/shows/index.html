@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Shows{% endblock %}
+{% block page_title %}Shows & Eventos{% endblock %}
+{% block page_subtitle %}Todos tus shows{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('shows.new') }}" class="btn btn-marifa btn-sm gap-2">
+  <i class="fas fa-plus"></i> Nuevo Show
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  <!-- PRÓXIMOS SHOWS -->
+  <section class="mb-10">
+    <div class="flex items-center gap-3 mb-5">
+      <h2 class="font-serif text-2xl text-gray-900"><i class="fas fa-calendar-star mr-2" style="color:#f43f5e;"></i>Próximos Shows</h2>
+      <span class="badge badge-sm" style="background: #fce7f3; color: #be185d; border: 1px solid #fbcfe8;">
+        {{ upcoming|length }}
+      </span>
+    </div>
+
+    {% if upcoming %}
+    <div class="space-y-3">
+      {% for show in upcoming %}
+      <div class="show-card p-5 {% if show.status == 'today' %}today{% endif %}"
+           style="cursor:pointer;"
+           onclick="window.location='{{ url_for('setlist.builder', show_id=show.id) }}'">
+        <div class="flex items-center gap-4 flex-wrap">
+
+          <!-- Fecha -->
+          <div class="text-center min-w-16">
+            <p class="font-serif text-3xl font-black leading-none" style="color:#1e1b2e;">{{ show.date.strftime('%d') }}</p>
+            <p class="text-xs uppercase tracking-widest mt-1" style="color:#4b5563;">{{ show.date.strftime('%b %Y') }}</p>
+          </div>
+
+          <!-- Divider -->
+          <div class="w-px h-12 hidden sm:block" style="background:#e5e7eb;"></div>
+
+          <!-- Info -->
+          <div class="flex-1">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <h3 class="font-serif text-xl font-bold" style="color:#1e1b2e;">{{ show.name }}</h3>
+              {% if show.status == 'today' %}
+                <span class="status-today badge badge-sm text-gray-900 text-xs font-bold px-2 py-1 rounded-full">
+                  ★ HOY
+                </span>
+              {% else %}
+                <span class="status-upcoming badge badge-sm text-xs px-2 py-1 rounded-full">
+                  {{ show.status_label }}
+                </span>
+              {% endif %}
+              {% if show.is_public %}
+                <span class="badge badge-sm badge-success gap-1 text-xs">
+                  <i class="fas fa-globe text-xs"></i> Público
+                </span>
+              {% endif %}
+            </div>
+            <div class="flex items-center gap-3 text-sm flex-wrap" style="color:#4b5563;">
+              {% if show.venue %}
+                <span><i class="fas fa-map-marker-alt mr-1" style="color:#f43f5e;"></i>{{ show.venue }}</span>
+              {% endif %}
+              {% if show.city %}
+                <span><i class="fas fa-city mr-1" style="color:#f43f5e;"></i>{{ show.city }}</span>
+              {% endif %}
+              <span><i class="fas fa-music mr-1" style="color:#f43f5e;"></i>{{ show.song_count }} canciones</span>
+              <span><i class="fas fa-clock mr-1" style="color:#f59e0b;"></i>{{ show.total_duration_display }}</span>
+            </div>
+          </div>
+
+          <!-- Acciones -->
+          <div class="flex items-center gap-2 flex-wrap" onclick="event.stopPropagation()">
+            <a href="{{ url_for('shows.edit', show_id=show.id) }}"
+               class="btn btn-sm btn-ghost" style="color:#4b5563;" title="Editar">
+              <i class="fas fa-edit"></i>
+            </a>
+            <form method="POST" action="{{ url_for('shows.delete', show_id=show.id) }}"
+                  onsubmit="return confirm('¿Eliminar este show?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-sm btn-ghost text-gray-600 hover:text-red-400" title="Eliminar">
+                <i class="fas fa-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state marifa-card">
+      <div class="empty-state-icon">🎤</div>
+      <p class="text-gray-700 mb-3">No hay shows próximos</p>
+      <a href="{{ url_for('shows.new') }}" class="btn btn-marifa btn-sm">
+        <i class="fas fa-plus mr-2"></i>Crear primer show
+      </a>
+    </div>
+    {% endif %}
+  </section>
+
+  <!-- SHOWS PASADOS -->
+  {% if past %}
+  <section>
+    <div class="flex items-center gap-3 mb-5">
+      <h2 class="font-serif text-xl text-gray-600"><i class="fas fa-calendar-check mr-2" style="color:#9ca3af;"></i>Shows Pasados</h2>
+      <span class="badge badge-sm badge-ghost">{{ past|length }}</span>
+    </div>
+    <div class="space-y-2">
+      {% for show in past %}
+      <div class="show-card p-4 opacity-60 hover:opacity-90 transition-opacity"
+           style="cursor:pointer;"
+           onclick="window.location='{{ url_for('setlist.builder', show_id=show.id) }}'">
+        <div class="flex items-center gap-4 flex-wrap">
+          <div class="text-center min-w-12">
+            <p class="font-serif text-xl font-black text-gray-700 leading-none">{{ show.date.strftime('%d') }}</p>
+            <p class="text-xs text-gray-600">{{ show.date.strftime('%b %y') }}</p>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-2">
+              <h3 class="text-gray-700 font-semibold">{{ show.name }}</h3>
+              <span class="status-past badge badge-sm text-xs px-2 rounded-full">{{ show.status_label }}</span>
+            </div>
+            {% if show.venue %}<p class="text-gray-600 text-xs">{{ show.venue }}</p>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
+</div>
+{% endblock %}

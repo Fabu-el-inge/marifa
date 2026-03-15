@@ -1,0 +1,1068 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if show %}Editar Show{% else %}Nuevo Show{% endif %}{% endblock %}
+{% block page_title %}{% if show %}Editar Show{% else %}Nuevo Show{% endif %}{% endblock %}
+{% block page_subtitle %}{% if show %}{{ show.name }}{% else %}Crear nuevo evento{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ request.args.get('next') or url_for('shows.index') }}" class="btn btn-ghost btn-sm gap-2 text-gray-700">
+  <i class="fas fa-arrow-left"></i> Volver
+</a>
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .location-wrapper { position: relative; }
+
+  .location-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0; right: 0;
+    background: white;
+    border: 1.5px solid #f3e8ff;
+    border-radius: 12px;
+    box-shadow: 0 8px 32px rgba(124,58,237,0.12);
+    z-index: 100;
+    overflow: hidden;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+
+  .location-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 14px;
+    cursor: pointer;
+    border-bottom: 1px solid #fdf4ff;
+    transition: background 0.15s;
+  }
+
+  .location-item:last-child { border-bottom: none; }
+  .location-item:hover { background: #fdf4ff; }
+
+  .location-item .loc-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f43f5e, #f59e0b);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .location-item .loc-icon i { color: white; font-size: 0.65rem; }
+
+  .location-item .loc-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #1e1b2e;
+    line-height: 1.3;
+  }
+
+  .location-item .loc-address {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin-top: 1px;
+  }
+
+  .location-searching {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+  }
+
+  .location-empty {
+    padding: 12px 14px;
+    color: #9ca3af;
+    font-size: 0.85rem;
+    text-align: center;
+  }
+
+  /* Highlight del input al buscar */
+  #venue-wrapper input:focus { border-color: #f43f5e; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Modal: Nuevo Músico rápido -->
+<div id="new-musician-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.5); display:none;"
+     onclick="if(event.target===this) closeNewMusicianModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    <div class="flex items-center justify-between p-5 border-b border-gray-100">
+      <h3 class="font-serif text-lg font-bold" style="color:#1e1b2e;">
+        <i class="fas fa-user-plus mr-2 text-violet-600"></i>Nuevo músico
+      </h3>
+      <button type="button" onclick="closeNewMusicianModal()"
+              class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+    <div class="p-5 space-y-4">
+      <!-- Nombre -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-user mr-1 text-violet-600"></i>Nombre *
+        </label>
+        <input type="text" id="nm-name"
+               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               placeholder="Nombre del músico" />
+        <p id="nm-error" class="text-red-500 text-xs mt-1" style="display:none;"></p>
+      </div>
+      <!-- Instrumento -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-music mr-1 text-violet-600"></i>Instrumento / Rol *
+        </label>
+        <select id="nm-instrument" class="marifa-input w-full px-4 py-2 text-gray-900">
+          {% for value, label in [
+            ('Batería','🥁 Batería'),('Guitarra','🎸 Guitarra'),('Bajo','🎸 Bajo'),
+            ('Piano','🎹 Piano'),('Teclado','🎹 Teclado'),('Violín','🎻 Violín'),
+            ('Saxofón','🎷 Saxofón'),('Trompeta','🎺 Trompeta'),('Percusión','🪘 Percusión'),
+            ('Coros','🎤 Coros'),('Acordeón','🪗 Acordeón'),('Flauta','🪈 Flauta'),
+            ('Contrabajo','🎻 Contrabajo'),('Sonidista','🎚️ Sonidista'),('Otro','🎵 Otro')
+          ] %}
+          <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <!-- Teléfono -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fab fa-whatsapp mr-1" style="color:#25D366;"></i>Teléfono / WhatsApp
+        </label>
+        <input type="tel" id="nm-phone"
+               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               placeholder="+595 981 123 456" />
+      </div>
+    </div>
+    <div class="flex gap-3 p-5 pt-0">
+      <button type="button" onclick="submitNewMusician()"
+              id="nm-submit-btn"
+              class="btn btn-marifa flex-1 py-2 font-semibold">
+        <i class="fas fa-plus mr-2"></i>Agregar músico
+      </button>
+      <button type="button" onclick="closeNewMusicianModal()"
+              class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Nueva Banda -->
+<div id="new-band-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.5); display:none;"
+     onclick="if(event.target===this) closeNewBandModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col" style="max-height:90vh;">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between p-5 border-b border-gray-100 flex-shrink-0">
+      <h3 class="font-serif text-lg font-bold" style="color:#1e1b2e;">
+        <i class="fas fa-guitar mr-2 text-violet-600"></i>Nueva banda
+      </h3>
+      <button type="button" onclick="closeNewBandModal()"
+              class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-gray-700">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Body (scrollable) -->
+    <div class="p-5 space-y-4 overflow-y-auto flex-1">
+
+      <!-- Nombre -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-guitar mr-1 text-violet-600"></i>Nombre *
+        </label>
+        <input type="text" id="nb-name"
+               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               placeholder="Ej: Banda de Cumbia, Trío Acústico, Banda Full" />
+        <p id="nb-error" class="text-red-500 text-xs mt-1" style="display:none;"></p>
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-sticky-note mr-1" style="color:#f59e0b;"></i>Descripción
+        </label>
+        <textarea id="nb-description"
+                  class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400 resize-none"
+                  rows="2"
+                  placeholder="Ej: Banda completa para eventos grandes, incluye sonido"></textarea>
+      </div>
+
+      <!-- Presupuesto -->
+      <div class="flex gap-2">
+        <div class="flex-1">
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            <i class="fas fa-money-bill-wave mr-1" style="color:#f59e0b;"></i>Presupuesto
+          </label>
+          <input type="number" id="nb-price"
+                 class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+                 placeholder="0" min="0" step="1000" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
+          <select id="nb-currency" class="marifa-input px-3 py-2 text-gray-900">
+            <option value="PYG">₲ PYG</option>
+            <option value="USD">USD</option>
+            <option value="ARS">ARS</option>
+            <option value="BRL">BRL</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Músicos -->
+      {% if musicians %}
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fas fa-users mr-1 text-violet-600"></i>Integrantes de la banda
+        </label>
+        <!-- Chips seleccionados -->
+        <div id="nb-selected-chips" class="flex flex-wrap gap-1 mb-2 min-h-6"></div>
+        <!-- Lista -->
+        <div class="border border-gray-200 rounded-xl overflow-hidden" style="max-height:200px;overflow-y:auto;">
+          {% set ns = namespace(current_instrument='') %}
+          {% for m in musicians %}
+            {% if m.instrument != ns.current_instrument %}
+              {% set ns.current_instrument = m.instrument %}
+              <div class="px-3 py-1 text-xs font-bold text-gray-500 bg-gray-50 border-b border-gray-100 sticky top-0">
+                {{ m.instrument_emoji }} {{ m.instrument }}
+              </div>
+            {% endif %}
+            <div class="nb-musician-item flex items-center gap-2 px-3 py-2 cursor-pointer border-b border-gray-50 hover:bg-violet-50 transition-colors"
+                 data-id="{{ m.id }}" data-name="{{ m.name }}" data-emoji="{{ m.instrument_emoji }}"
+                 onclick="toggleBandMusician(this)">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                   style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+                {{ m.name[0].upper() }}
+              </div>
+              <span class="text-sm text-gray-800 flex-1">{{ m.name }}</span>
+              <i class="fas fa-check-circle text-violet-600 nb-check" style="display:none;"></i>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <!-- Footer -->
+    <div class="flex gap-3 p-5 border-t border-gray-100 flex-shrink-0">
+      <button type="button" onclick="submitNewBand()"
+              id="nb-submit-btn"
+              class="btn btn-marifa flex-1 py-2 font-semibold">
+        <i class="fas fa-plus mr-2"></i>Crear banda
+      </button>
+      <button type="button" onclick="closeNewBandModal()"
+              class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="max-w-xl mx-auto">
+  <div class="marifa-card p-8">
+    <div class="mb-6">
+      <h2 class="font-serif text-2xl text-gray-900 mb-1">
+        {% if show %}✏️ Editar Show{% else %}🎤 Nuevo Show{% endif %}
+      </h2>
+      <div class="staff-divider"></div>
+    </div>
+
+    <form method="POST">
+      {{ form.hidden_tag() }}
+
+      <div class="space-y-5">
+
+        <!-- Nombre del show -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-star mr-2 text-violet-600"></i>Nombre del Show *
+            </span>
+          </label>
+          <input type="text" name="name" id="name"
+                 value="{{ form.name.data or '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 placeholder="Ej: Noche de Cumbia en el Jardín Botánico"
+                 required />
+          {% if form.name.errors %}
+            <span class="text-red-500 text-xs mt-1">{{ form.name.errors[0] }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Fecha -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-calendar mr-2 text-violet-600"></i>Fecha *
+            </span>
+          </label>
+          <input type="date" name="date" id="date"
+                 value="{{ form.date.data.strftime('%Y-%m-%d') if form.date.data else '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900"
+                 required />
+          {% if form.date.errors %}
+            <span class="text-red-500 text-xs mt-1">{{ form.date.errors[0] }}</span>
+          {% endif %}
+        </div>
+
+        <!-- VENUE con autocomplete tipo Google Maps -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-map-marker-alt mr-2" style="color:#f43f5e;"></i>Venue / Lugar
+            </span>
+            <span class="label-text-alt text-xs" style="color:#9ca3af;">
+              <i class="fas fa-search text-xs mr-1"></i>Buscá el lugar
+            </span>
+          </label>
+
+          <!-- Wrapper con posición relativa para el dropdown -->
+          <div class="location-wrapper" id="venue-wrapper">
+            <input type="text" name="venue" id="venue"
+                   value="{{ form.venue.data or '' }}"
+                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   placeholder="Escribí el nombre del lugar..."
+                   autocomplete="off" />
+
+            <!-- Dropdown de sugerencias -->
+            <div class="location-dropdown" id="venue-dropdown" style="display:none;"></div>
+          </div>
+        </div>
+
+        <!-- Ciudad (se autocompleta sola) -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-city mr-2 text-violet-600"></i>Ciudad
+            </span>
+            <span class="label-text-alt text-xs" style="color:#9ca3af;">Se completa automáticamente</span>
+          </label>
+          <div class="relative">
+            <input type="text" name="city" id="city"
+                   value="{{ form.city.data or '' }}"
+                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   placeholder="Ciudad" />
+            <i class="fas fa-check-circle absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
+               id="city-check" style="display:none;"></i>
+          </div>
+        </div>
+
+        <!-- Notas generales -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-sticky-note mr-2" style="color:#f59e0b;"></i>Notas generales
+            </span>
+          </label>
+          <textarea name="general_notes" id="general_notes"
+                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
+                    rows="3"
+                    placeholder="Observaciones, contactos, indicaciones especiales...">{{ form.general_notes.data or '' }}</textarea>
+        </div>
+
+        <!-- Músicos del show -->
+        {% if musicians %}
+        <div class="form-control" id="musicians-section">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-users mr-2" style="color:#7c3aed;"></i>Músicos del show
+            </span>
+            <button type="button" onclick="openNewMusicianModal()"
+               class="label-text-alt text-xs flex items-center gap-1 hover:text-violet-600 transition-colors" style="color:#9ca3af; background:none; border:none; cursor:pointer; padding:0;">
+              <i class="fas fa-plus-circle"></i> Nuevo músico
+            </button>
+          </label>
+          <p class="text-xs mb-2" style="color:#6b7280;">
+            Seleccioná ahí abajo quiénes van a tocar con vos en este show.
+          </p>
+
+          <!-- Chips siempre visibles -->
+          <div id="selected-musicians" class="flex flex-wrap gap-2 mb-3 min-h-8"></div>
+
+          <!-- Grid de músicos disponibles (se oculta cuando hay banda) -->
+          <div id="musicians-picker" class="border border-gray-200 rounded-xl overflow-hidden"
+               style="max-height: 260px; overflow-y: auto;">
+            {% set ns = namespace(current_instrument='') %}
+            {% for m in musicians %}
+              {% if m.instrument != ns.current_instrument %}
+                {% set ns.current_instrument = m.instrument %}
+                <div class="px-3 py-1 text-xs font-bold text-gray-500 bg-gray-50 border-b border-gray-100 sticky top-0">
+                  {{ m.instrument_emoji }} {{ m.instrument }}
+                </div>
+              {% endif %}
+              <div class="musician-pick-item flex items-center gap-2 px-3 py-2 cursor-pointer border-b border-gray-50 hover:bg-violet-50 transition-colors"
+                   data-id="{{ m.id }}"
+                   data-name="{{ m.name }}"
+                   data-instrument="{{ m.instrument }}"
+                   data-emoji="{{ m.instrument_emoji }}"
+                   onclick="toggleMusician(this)">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                     style="background: linear-gradient(135deg, #7c3aed, #f43f5e);">
+                  {{ m.name[0].upper() }}
+                </div>
+                <div class="flex-1">
+                  <span class="text-sm font-medium text-gray-800">{{ m.name }}</span>
+                  {% if m.phone %}
+                  <span class="text-xs text-gray-400 ml-1">· {{ m.phone }}</span>
+                  {% endif %}
+                </div>
+                <i class="fas fa-check-circle text-violet-600 check-icon" style="display:none;"></i>
+                <input type="hidden" name="musician_ids" value="{{ m.id }}"
+                       id="musician-hidden-{{ m.id }}" disabled />
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Sección sesionista (solo visible cuando hay banda seleccionada) -->
+        <div id="sessionista-section" class="form-control" style="display:none;">
+          <div class="p-3 rounded-xl mb-2" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+            <p class="text-sm font-medium text-green-800">
+              <i class="fas fa-check-circle mr-1"></i>Banda seleccionada — músicos auto-asignados
+            </p>
+            <p class="text-xs text-gray-500 mt-0.5">
+              Si necesitás sumar un músico extra para este show solamente, usá el botón de abajo.
+            </p>
+          </div>
+          <button type="button" onclick="openNewMusicianModal()"
+                  class="btn btn-ghost btn-sm gap-2" style="color:#f97316; border:1px dashed #fed7aa;">
+            <i class="fas fa-user-plus text-xs"></i> Agregar sesionista
+          </button>
+        </div>
+
+        {% else %}
+        <div class="form-control">
+          <div class="flex items-center gap-2 p-3 rounded-xl" style="background:#fdf4ff; border:1px dashed #e9d5ff;">
+            <i class="fas fa-users text-violet-400"></i>
+            <span class="text-sm text-gray-600">
+              Aún no tenés músicos.
+              <a href="{{ url_for('musicians.new') }}" class="text-violet-600 font-medium hover:underline">Agregá el primero</a>
+            </span>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Banda prearmada -->
+        <div class="form-control" id="band-selector-section">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-guitar mr-2" style="color:#f43f5e;"></i>Banda prearmada
+            </span>
+            <span class="label-text-alt text-xs text-gray-400">Aplicar una banda guardada</span>
+          </label>
+          <div class="flex gap-2">
+            <select id="band-preset-select"
+                    class="marifa-input flex-1 px-4 py-3 text-gray-900"
+                    onchange="applyBandPreset(this)">
+              <option value="">— Seleccioná una banda —</option>
+              <!-- Cargadas por JS -->
+            </select>
+            <button type="button" onclick="openNewBandModal()"
+                    class="btn border border-gray-200 text-gray-600 px-5 py-3" title="Crear nueva banda"
+                    style="min-width:52px; height:100%;">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+          <!-- Precio de la banda -->
+          <div id="band-price-badge" class="mt-2" style="display:none;">
+            <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold"
+                  style="background:linear-gradient(135deg,#fef3c7,#fde68a);border:1px solid #f59e0b;color:#92400e;">
+              <i class="fas fa-money-bill-wave text-xs"></i>
+              <span id="band-price-text"></span>
+            </span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+          {% if show %}
+            <i class="fas fa-save mr-2"></i>Guardar cambios
+          {% else %}
+            <i class="fas fa-rocket mr-2"></i>Crear Show
+          {% endif %}
+        </button>
+        <a href="{{ request.args.get('next') or url_for('shows.index') }}" class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// ── Modal: Nuevo músico rápido ──────────────────────────────────────────────
+function openNewMusicianModal() {
+  document.getElementById('nm-name').value = '';
+  document.getElementById('nm-phone').value = '';
+  document.getElementById('nm-instrument').selectedIndex = 0;
+  document.getElementById('nm-error').style.display = 'none';
+  document.getElementById('new-musician-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('nm-name').focus(), 100);
+}
+
+function closeNewMusicianModal() {
+  document.getElementById('new-musician-modal').style.display = 'none';
+}
+
+function submitNewMusician() {
+  const name = document.getElementById('nm-name').value.trim();
+  const instrument = document.getElementById('nm-instrument').value;
+  const phone = document.getElementById('nm-phone').value.trim();
+  const errorEl = document.getElementById('nm-error');
+  const btn = document.getElementById('nm-submit-btn');
+
+  if (!name) {
+    errorEl.textContent = 'El nombre es requerido.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...';
+
+  fetch('/musicians/api/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({ name, instrument, phone })
+  })
+  .then(r => r.json())
+  .then(function(data) {
+    if (data.error) {
+      errorEl.textContent = data.error;
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Agregar músico';
+      return;
+    }
+    const m = data.musician;
+    addMusicianToList(m);
+    closeNewMusicianModal();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Agregar músico';
+  })
+  .catch(function() {
+    errorEl.textContent = 'Error al guardar. Intentá de nuevo.';
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Agregar músico';
+  });
+}
+
+function addMusicianToList(m) {
+  const container = document.querySelector('.border.border-gray-200.rounded-xl');
+  if (!container) return;
+
+  // Agregar hidden input
+  const hiddenInput = document.createElement('input');
+  hiddenInput.type = 'hidden';
+  hiddenInput.name = 'musician_ids';
+  hiddenInput.value = m.id;
+  hiddenInput.id = 'musician-hidden-' + m.id;
+  hiddenInput.disabled = true;
+  document.querySelector('form').appendChild(hiddenInput);
+
+  // Buscar o crear sección del instrumento
+  const row = document.createElement('div');
+  row.className = 'musician-pick-item flex items-center gap-2 px-3 py-2 cursor-pointer border-b border-gray-50 hover:bg-violet-50 transition-colors';
+  row.dataset.id = m.id;
+  row.dataset.name = m.name;
+  row.dataset.instrument = m.instrument;
+  row.dataset.emoji = m.emoji;
+  row.setAttribute('onclick', 'toggleMusician(this)');
+  row.innerHTML = `
+    <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+         style="background: linear-gradient(135deg, #7c3aed, #f43f5e);">
+      ${m.name[0].toUpperCase()}
+    </div>
+    <div class="flex-1">
+      <span class="text-sm font-medium text-gray-800">${m.name}</span>
+      ${m.phone ? `<span class="text-xs text-gray-400 ml-1">· ${m.phone}</span>` : ''}
+    </div>
+    <i class="fas fa-check-circle text-violet-600 check-icon" style="display:none;"></i>
+  `;
+  container.appendChild(row);
+
+  // Auto-seleccionar el nuevo músico
+  toggleMusician(row);
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeNewMusicianModal(); closeNewBandModal(); }
+});
+
+// ── Modal: Nueva banda ──────────────────────────────────────────────────────
+const nbSelectedIds = new Set();
+
+function openNewBandModal() {
+  document.getElementById('nb-name').value = '';
+  document.getElementById('nb-description').value = '';
+  document.getElementById('nb-price').value = '';
+  document.getElementById('nb-currency').value = 'PYG';
+  document.getElementById('nb-error').style.display = 'none';
+  // Resetear selección de músicos
+  nbSelectedIds.clear();
+  document.getElementById('nb-selected-chips').innerHTML = '';
+  document.querySelectorAll('.nb-musician-item').forEach(function(el) {
+    el.querySelector('.nb-check').style.display = 'none';
+    el.style.background = '';
+  });
+  document.getElementById('new-band-modal').style.display = 'flex';
+  setTimeout(() => document.getElementById('nb-name').focus(), 100);
+}
+
+function closeNewBandModal() {
+  document.getElementById('new-band-modal').style.display = 'none';
+}
+
+function toggleBandMusician(el) {
+  const id = parseInt(el.dataset.id);
+  const check = el.querySelector('.nb-check');
+  const chipsContainer = document.getElementById('nb-selected-chips');
+  if (nbSelectedIds.has(id)) {
+    nbSelectedIds.delete(id);
+    check.style.display = 'none';
+    el.style.background = '';
+    const chip = document.getElementById('nb-chip-' + id);
+    if (chip) chip.remove();
+  } else {
+    nbSelectedIds.add(id);
+    check.style.display = 'block';
+    el.style.background = '#f5f3ff';
+    const chip = document.createElement('span');
+    chip.id = 'nb-chip-' + id;
+    chip.className = 'inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs';
+    chip.style = 'background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;';
+    chip.innerHTML = el.dataset.emoji + ' ' + el.dataset.name +
+      ' <button type="button" onclick="toggleBandMusician(document.querySelector(\'[data-id=\\\'' + id + '\\\'\].nb-musician-item\'))" style="opacity:0.6;margin-left:2px;">×</button>';
+    chipsContainer.appendChild(chip);
+  }
+}
+
+function submitNewBand() {
+  const name = document.getElementById('nb-name').value.trim();
+  const description = document.getElementById('nb-description').value.trim();
+  const price = document.getElementById('nb-price').value.trim();
+  const currency = document.getElementById('nb-currency').value;
+  const errorEl = document.getElementById('nb-error');
+  const btn = document.getElementById('nb-submit-btn');
+
+  if (!name) {
+    errorEl.textContent = 'El nombre es requerido.';
+    errorEl.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Guardando...';
+
+  fetch('/bands/api/create', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content
+    },
+    body: JSON.stringify({
+      name,
+      description: description || null,
+      price: price || null,
+      currency,
+      musician_ids: Array.from(nbSelectedIds)
+    })
+  })
+  .then(r => r.json())
+  .then(function(data) {
+    if (data.error) {
+      errorEl.textContent = data.error;
+      errorEl.style.display = 'block';
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Crear banda';
+      return;
+    }
+    const b = data.band;
+    const count = b.member_count;
+    const sel = document.getElementById('band-preset-select');
+    const opt = document.createElement('option');
+    opt.value = b.id;
+    opt.textContent = b.name + (b.price_display ? ' — ' + b.price_display : '') + ' (' + count + ' músico' + (count !== 1 ? 's' : '') + ')';
+    opt.selected = true;
+    sel.appendChild(opt);
+    bandsData.push(b);
+    // Aplicar automáticamente la banda recién creada
+    applyBandPreset(sel);
+    closeNewBandModal();
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Crear banda';
+  })
+  .catch(function() {
+    errorEl.textContent = 'Error al guardar. Intentá de nuevo.';
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-plus mr-2"></i>Crear banda';
+  });
+}
+
+// ── Bandas prearmadas ───────────────────────────────────────────────────────
+let bandsData = [];
+
+fetch('/bands/api/list')
+  .then(r => r.json())
+  .then(function(bands) {
+    bandsData = bands;
+    const sel = document.getElementById('band-preset-select');
+    if (!sel) return;
+    bands.forEach(function(b) {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.name + (b.price_display ? ' — ' + b.price_display : '') + ' (' + b.member_count + ' músicos)';
+      sel.appendChild(opt);
+    });
+  })
+  .catch(function() {});
+
+function applyBandPreset(sel) {
+  const bandId           = parseInt(sel.value);
+  const priceBadge       = document.getElementById('band-price-badge');
+  const priceText        = document.getElementById('band-price-text');
+  const musiciansPicker  = document.getElementById('musicians-picker');
+  const sessionistaSect  = document.getElementById('sessionista-section');
+
+  if (!bandId) {
+    priceBadge.style.display = 'none';
+    if (musiciansPicker) musiciansPicker.style.display = 'block';
+    if (sessionistaSect) sessionistaSect.style.display = 'none';
+    return;
+  }
+
+  // Banda seleccionada: ocultar picker, mostrar aviso sesionista
+  if (musiciansPicker) musiciansPicker.style.display = 'none';
+  if (sessionistaSect) sessionistaSect.style.display = 'block';
+
+  const band = bandsData.find(b => b.id === bandId);
+  if (!band) return;
+
+  // Mostrar precio
+  if (band.price_display) {
+    priceText.textContent = 'Presupuesto: ' + band.price_display;
+    priceBadge.style.display = 'block';
+  } else {
+    priceBadge.style.display = 'none';
+  }
+
+  // Deseleccionar todos y seleccionar los de la banda
+  document.querySelectorAll('.musician-pick-item').forEach(function(el) {
+    const id = parseInt(el.dataset.id);
+    if (assignedIds.has(id)) {
+      // quitar los actuales que no sean de la banda
+      if (!band.musician_ids.includes(id)) {
+        assignedIds.delete(id);
+        document.getElementById('musician-hidden-' + id).disabled = true;
+        el.querySelector('.check-icon').style.display = 'none';
+        el.style.background = '';
+        const chip = document.getElementById('chip-' + id);
+        if (chip) chip.remove();
+      }
+    } else {
+      // agregar los de la banda que no estén
+      if (band.musician_ids.includes(id)) {
+        assignedIds.add(id);
+        document.getElementById('musician-hidden-' + id).disabled = false;
+        el.querySelector('.check-icon').style.display = 'block';
+        el.style.background = '#f5f3ff';
+        addMusicianChip(id, el.dataset.name, el.dataset.emoji);
+      }
+    }
+  });
+}
+
+// ── Músicos del show ────────────────────────────────────────────────────────
+const assignedIds = new Set({{ assigned_ids | tojson }});
+
+function toggleMusician(el) {
+  const id = el.dataset.id;
+  const hidden = document.getElementById('musician-hidden-' + id);
+  const icon   = el.querySelector('.check-icon');
+
+  if (assignedIds.has(parseInt(id))) {
+    // Quitar
+    assignedIds.delete(parseInt(id));
+    hidden.disabled = true;
+    icon.style.display = 'none';
+    el.style.background = '';
+    removeMusicianChip(id);
+  } else {
+    // Agregar
+    assignedIds.add(parseInt(id));
+    hidden.disabled = false;
+    icon.style.display = 'block';
+    el.style.background = '#f5f3ff';
+    addMusicianChip(id, el.dataset.name, el.dataset.emoji);
+  }
+}
+
+function addMusicianChip(id, name, emoji) {
+  const container = document.getElementById('selected-musicians');
+  const chip = document.createElement('span');
+  chip.id = 'chip-' + id;
+  chip.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium';
+  chip.style = 'background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd;';
+  chip.innerHTML = `${emoji} ${name} <button type="button" onclick="toggleMusician(document.querySelector('[data-id=\\'${id}\\']'))" style="margin-left:2px; opacity:0.6;" title="Quitar">×</button>`;
+  container.appendChild(chip);
+}
+
+function removeMusicianChip(id) {
+  const chip = document.getElementById('chip-' + id);
+  if (chip) chip.remove();
+}
+
+// Pre-cargar músicos ya asignados al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+  assignedIds.forEach(function(id) {
+    const el = document.querySelector('[data-id="' + id + '"]');
+    if (el) {
+      const hidden = document.getElementById('musician-hidden-' + id);
+      const icon   = el.querySelector('.check-icon');
+      hidden.disabled = false;
+      icon.style.display = 'block';
+      el.style.background = '#f5f3ff';
+      addMusicianChip(id, el.dataset.name, el.dataset.emoji);
+    }
+  });
+});
+</script>
+
+<script>
+(function() {
+  const venueInput   = document.getElementById('venue');
+  const cityInput    = document.getElementById('city');
+  const dropdown     = document.getElementById('venue-dropdown');
+  const cityCheck    = document.getElementById('city-check');
+
+  let searchTimer = null;
+  let lastQuery   = '';
+
+  // ── Escuchar escritura ──────────────────────────────────
+  venueInput.addEventListener('input', function() {
+    const q = this.value.trim();
+    clearTimeout(searchTimer);
+
+    if (q.length < 2) {
+      hideDropdown();
+      return;
+    }
+    if (q === lastQuery) return;
+    lastQuery = q;
+
+    showSearching();
+
+    searchTimer = setTimeout(() => searchPlaces(q), 400);
+  });
+
+  // Cerrar al hacer click fuera
+  document.addEventListener('click', function(e) {
+    if (!document.getElementById('venue-wrapper').contains(e.target)) {
+      hideDropdown();
+    }
+  });
+
+  // ── API: Nominatim (OSM) con foco en Paraguay ───────────
+  function searchPlaces(query) {
+    // Busca primero en Paraguay; si no hay resultados, busca globalmente
+    const base = 'https://nominatim.openstreetmap.org/search';
+    const params = new URLSearchParams({
+      q: query,
+      format: 'json',
+      limit: 8,
+      addressdetails: 1,
+      'accept-language': 'es',
+      countrycodes: 'py',        // Paraguay primero
+    });
+
+    fetch(`${base}?${params}`, {
+      headers: { 'User-Agent': 'MariFa-App/1.0' }
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (!data || data.length === 0) {
+          // Sin resultados en PY → buscar sin filtro de país
+          const paramsGlobal = new URLSearchParams({
+            q: query,
+            format: 'json',
+            limit: 6,
+            addressdetails: 1,
+            'accept-language': 'es',
+          });
+          return fetch(`${base}?${paramsGlobal}`, {
+            headers: { 'User-Agent': 'MariFa-App/1.0' }
+          }).then(r => r.json());
+        }
+        return data;
+      })
+      .then(data => {
+        if (!data || data.length === 0) { showEmpty(); return; }
+        renderNominatimResults(data);
+      })
+      .catch(() => showEmpty());
+  }
+
+  // ── Renderizar resultados Nominatim ─────────────────────
+  function renderNominatimResults(results) {
+    dropdown.innerHTML = '';
+
+    results.forEach(r => {
+      const name = r.name || r.display_name.split(',')[0] || '';
+      if (!name) return;
+
+      const addr = r.address || {};
+      const parts = [];
+      if (addr.road && addr.road !== name)     parts.push(addr.road);
+      if (addr.city || addr.town || addr.village) parts.push(addr.city || addr.town || addr.village);
+      if (addr.state)                           parts.push(addr.state);
+      if (addr.country)                         parts.push(addr.country);
+      const address = parts.join(', ');
+
+      const iconClass = getNominatimIcon(r.type, r.class);
+
+      const item = document.createElement('div');
+      item.className = 'location-item';
+      item.innerHTML = `
+        <div class="loc-icon"><i class="${iconClass}"></i></div>
+        <div>
+          <div class="loc-name">${escapeHtml(name)}</div>
+          ${address ? `<div class="loc-address">${escapeHtml(address)}</div>` : ''}
+        </div>
+      `;
+
+      const city = addr.city || addr.town || addr.village || addr.municipality || '';
+      item.addEventListener('click', () => selectPlace(name, { city }));
+      dropdown.appendChild(item);
+    });
+
+    if (dropdown.children.length === 0) { showEmpty(); return; }
+    showDropdown();
+  }
+
+  function getNominatimIcon(type, cls) {
+    if (['theatre', 'arts_centre', 'cinema'].includes(type)) return 'fas fa-theater-masks';
+    if (['bar', 'pub', 'nightclub'].includes(type))          return 'fas fa-cocktail';
+    if (['stadium', 'sports_hall', 'sports_centre'].includes(type)) return 'fas fa-trophy';
+    if (['restaurant', 'cafe', 'fast_food'].includes(type))  return 'fas fa-utensils';
+    if (type === 'park' || type === 'garden')                return 'fas fa-tree';
+    if (['university', 'school', 'college'].includes(type))  return 'fas fa-graduation-cap';
+    if (cls === 'place')                                     return 'fas fa-city';
+    if (cls === 'highway')                                   return 'fas fa-road';
+    return 'fas fa-map-marker-alt';
+  }
+
+  // ── Renderizar resultados ───────────────────────────────
+  function renderResults(features) {
+    dropdown.innerHTML = '';
+
+    features.forEach(f => {
+      const p    = f.properties;
+      const name = p.name || p.street || '';
+      if (!name) return;
+
+      // Armar dirección secundaria
+      const parts = [];
+      if (p.street && p.street !== name)  parts.push(p.street);
+      if (p.city)                          parts.push(p.city);
+      if (p.state)                         parts.push(p.state);
+      if (p.country)                       parts.push(p.country);
+      const address = parts.join(', ');
+
+      // Ícono según tipo
+      const iconClass = getIcon(p);
+
+      const item = document.createElement('div');
+      item.className = 'location-item';
+      item.innerHTML = `
+        <div class="loc-icon"><i class="${iconClass}"></i></div>
+        <div>
+          <div class="loc-name">${escapeHtml(name)}</div>
+          ${address ? `<div class="loc-address">${escapeHtml(address)}</div>` : ''}
+        </div>
+      `;
+
+      item.addEventListener('click', () => selectPlace(name, p));
+      dropdown.appendChild(item);
+    });
+
+    showDropdown();
+  }
+
+  // ── Al seleccionar un lugar ─────────────────────────────
+  function selectPlace(name, p) {
+    venueInput.value = name;
+
+    // Auto-completar ciudad
+    const city = p.city || p.town || p.village || p.municipality || '';
+    if (city) {
+      cityInput.value = city;
+      cityCheck.style.display = 'block';
+      setTimeout(() => cityCheck.style.display = 'none', 3000);
+    }
+
+    hideDropdown();
+    venueInput.focus();
+  }
+
+  // ── Ícono según tipo de lugar ───────────────────────────
+  function getIcon(p) {
+    const type = (p.type || '').toLowerCase();
+    const osm  = (p.osm_value || '').toLowerCase();
+    if (['theatre', 'theater', 'arts_centre'].includes(osm)) return 'fas fa-theater-masks';
+    if (['bar', 'pub', 'nightclub'].includes(osm))           return 'fas fa-cocktail';
+    if (['stadium', 'sports_hall'].includes(osm))            return 'fas fa-trophy';
+    if (['restaurant', 'cafe'].includes(osm))               return 'fas fa-utensils';
+    if (osm === 'park')                                      return 'fas fa-tree';
+    if (['university', 'school', 'college'].includes(osm))  return 'fas fa-graduation-cap';
+    if (type === 'city' || type === 'town')                  return 'fas fa-city';
+    return 'fas fa-map-marker-alt';
+  }
+
+  // ── UI helpers ──────────────────────────────────────────
+  function showSearching() {
+    dropdown.innerHTML = `
+      <div class="location-searching">
+        <div class="loading-spinner" style="width:16px;height:16px;border-width:2px;"></div>
+        Buscando lugares...
+      </div>`;
+    showDropdown();
+  }
+
+  function showEmpty() {
+    dropdown.innerHTML = `
+      <div class="location-empty">
+        <i class="fas fa-search-minus mr-1"></i>
+        Sin resultados. Escribí el nombre del lugar.
+      </div>`;
+    showDropdown();
+  }
+
+  function showDropdown() { dropdown.style.display = 'block'; }
+  function hideDropdown() { dropdown.style.display = 'none'; }
+
+  function escapeHtml(str) {
+    return String(str || '')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+{% endblock %}

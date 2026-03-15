@@ -1,0 +1,169 @@
+==============================
+  MARIFÁ — App de Setlists
+==============================
+
+ACCESO A LA APP
+---------------
+URL local:   http://localhost:5000
+Usuario:     marifa
+Email:       marifa@marifa.app
+Contraseña:  marifa2024
+
+PARA INICIAR LA APP
+-------------------
+1. Abrir terminal en la carpeta: C:\Users\HP\Desktop\sistemas\marife
+2. Ejecutar: venv\Scripts\python run.py
+3. Abrir en el navegador: http://localhost:5000
+
+
+==============================
+  ESTADO DEL PROYECTO
+==============================
+
+QUÉ ES MARIFÁ
+-----------
+App web para que una cantante gestione setlists.
+- Armás un Show (fecha, venue, ciudad)
+- Le asignás canciones desde el catálogo
+- Reordenás con drag & drop
+- Compartís link público con los músicos (sin que tengan que loguearse)
+- Podés exportar PDF
+
+STACK TÉCNICO
+-------------
+- Backend:   Python 3.11 + Flask 3.x
+- Base de datos: SQLite (archivo: instance/marifa.db)
+- ORM:       SQLAlchemy + Flask-Migrate
+- Auth:      Flask-Login
+- CSS:       Tailwind CSS + clases custom en app/static/css/marifa.css
+- JS:        Alpine.js + SortableJS (drag & drop) + fetch
+- PDF:       WeasyPrint
+
+ESTRUCTURA DE CARPETAS
+----------------------
+marifa/
+├── app/
+│   ├── __init__.py           (app factory)
+│   ├── extensions.py         (db, login_manager, migrate)
+│   ├── models/               (user, song, show, setlist_item)
+│   ├── routes/               (auth, songs, shows, setlist, public)
+│   ├── static/
+│   │   ├── css/marifa.css      (estilos custom)
+│   │   └── js/
+│   │       ├── catalog.js    (búsqueda + drag&drop del builder)
+│   │       └── sortable-init.js
+│   └── templates/
+│       ├── base.html
+│       ├── auth/login.html
+│       ├── songs/            (index, form)
+│       ├── shows/            (index, form)
+│       ├── setlist/          (builder, print)
+│       └── public/show.html  (vista pública para músicos)
+├── config.py
+├── run.py
+├── seed.py                   (datos de prueba)
+├── requirements.txt
+├── .env                      (SECRET_KEY, DATABASE_URL)
+└── NOTAS.txt                 (este archivo)
+
+MODELOS DE BASE DE DATOS
+------------------------
+User:        id, username, email, password_hash, created_at
+Song:        id, title, original_artist, genre, key, bpm, duration_sec,
+             lyrics, musician_notes, is_active, created_at, updated_at
+Show:        id, name, date, venue, city, general_notes,
+             public_token, is_public, created_at, updated_at
+SetlistItem: id, show_id, song_id (nullable), position, notes_override,
+             is_break, break_label, created_at
+
+RUTAS PRINCIPALES
+-----------------
+/auth/login              Login
+/songs/                  Catálogo de canciones
+/songs/new               Nueva canción
+/songs/<id>/edit         Editar canción
+/shows/                  Lista de shows
+/shows/new               Nuevo show
+/setlist/<id>/builder    Armador drag & drop
+/p/<token>               Vista pública para músicos (sin login)
+
+FEATURES IMPLEMENTADOS
+----------------------
+[x] Login / Logout
+[x] CRUD canciones (título, artista, género, tonalidad, BPM, duración, letra, notas)
+[x] Géneros con badges de colores + emojis
+[x] CRUD shows (nombre, fecha, venue, ciudad, notas generales)
+[x] Armador de setlist con drag & drop (SortableJS)
+[x] Búsqueda en tiempo real en el catálogo dentro del builder
+[x] Arrastrar canción del catálogo al setlist y viceversa
+[x] Notas por canción específicas del show (notes_override)
+[x] Intermedios/pausas insertables entre canciones
+[x] Duración total calculada automáticamente
+[x] Alerta si el setlist supera 2 horas
+[x] Activar link público por show (toggle)
+[x] Vista pública mobile-first para músicos (/p/<token>)
+[x] Botón de compartir por WhatsApp
+[x] Exportar PDF (WeasyPrint)
+[x] Vista de impresión CSS limpia
+[x] Grabación de referencia de audio en el formulario de canción
+[x] Números de posición estilo cartelera (Playfair Display)
+[x] Animación de nota musical flotante al agregar canción
+[x] Empty states
+[x] Flash messages
+[x] Diseño responsivo
+
+IDENTIDAD VISUAL
+----------------
+- Paleta: fondo crema (#fdf8f5), sidebar verde oscuro (#1e3d2f),
+          acento rosa (#f43f5e), dorado (#f59e0b), violeta (#7c3aed)
+- Fuentes: Playfair Display (títulos) + Inter (cuerpo)
+- Logo: "MariFá" en cursiva con degradado rosa→dorado
+
+IDENTIDAD
+---------
+La app se llama "MariFá". Carpeta, CSS, base de datos y código: todo dice marifa.
+
+
+==============================
+  PENDIENTE — DEPLOY
+==============================
+
+PASOS EN ORDEN
+--------------
+1. Subir código a GitHub
+   - Crear repo en github.com (privado o público)
+   - git init, git add ., git commit -m "Initial commit"
+   - git remote add origin <url-del-repo>
+   - git push
+
+2. Migrar base de datos a Supabase (PostgreSQL)
+   - Crear cuenta en supabase.com
+   - Crear nuevo proyecto → copiar la "Connection string" (PostgreSQL)
+   - En .env cambiar DATABASE_URL a la de Supabase
+   - Ejecutar: flask db upgrade (crea las tablas en Supabase)
+   - Ejecutar: python seed.py (opcional, para datos de prueba)
+   - Volver a crear el usuario marifa en producción
+
+3. Deployar en Railway
+   - Crear cuenta en railway.app
+   - Nuevo proyecto → conectar repositorio de GitHub
+   - Agregar variables de entorno (las del .env)
+   - Railway detecta Python automáticamente con gunicorn
+   - La app queda online en una URL tipo marifa.up.railway.app
+
+VARIABLES DE ENTORNO PARA PRODUCCIÓN (.env)
+--------------------------------------------
+SECRET_KEY=<clave-secreta-larga>
+DATABASE_URL=postgresql://... (la de Supabase)
+FLASK_ENV=production
+
+
+==============================
+  PARA PEDIRLE AYUDA A CLAUDE
+==============================
+
+Cuando abras una nueva sesión, mostrale este archivo completo.
+Con eso ya sabe todo sobre el proyecto y puede ayudarte a continuar.
+
+Decile: "Continuemos con el proyecto MariFá. Te paso las notas:"
+y pegá el contenido de este archivo.

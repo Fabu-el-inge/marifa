@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setlist — {{ show.name }}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: white;
+      color: #1a1a2e;
+      padding: 30px 40px;
+      font-size: 13px;
+    }
+
+    /* HEADER */
+    .print-header {
+      border-bottom: 3px solid #c026d3;
+      padding-bottom: 20px;
+      margin-bottom: 24px;
+    }
+
+    .logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 900;
+      font-style: italic;
+      color: #c026d3;
+      letter-spacing: -0.02em;
+    }
+
+    .show-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1a1a2e;
+      margin-top: 8px;
+    }
+
+    .show-meta {
+      display: flex;
+      gap: 20px;
+      margin-top: 8px;
+      color: #666;
+      font-size: 12px;
+    }
+
+    .show-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* STATS */
+    .stats-bar {
+      display: flex;
+      gap: 24px;
+      background: #f8f0ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-size: 12px;
+    }
+
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.4rem; font-weight: 700; color: #c026d3; font-family: 'Playfair Display', serif; }
+    .stat-label { color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* SETLIST TABLE */
+    .setlist-table { width: 100%; border-collapse: collapse; }
+
+    .setlist-table th {
+      background: #f3e8ff;
+      color: #7c3aed;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 8px 10px;
+      text-align: left;
+      border-bottom: 2px solid #c026d3;
+    }
+
+    .setlist-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid #f0e6ff;
+      vertical-align: top;
+    }
+
+    .setlist-table tr:nth-child(even) td { background: #fdf8ff; }
+
+    /* Número de posición */
+    .pos-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #c026d3;
+      opacity: 0.4;
+      line-height: 1;
+    }
+
+    /* Canción */
+    .song-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #1a1a2e;
+    }
+
+    .song-artist {
+      color: #666;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    /* Genre badge */
+    .genre-badge {
+      display: inline-block;
+      background: #f3e8ff;
+      color: #7c3aed;
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 12px;
+      margin-top: 4px;
+    }
+
+    /* Key badge */
+    .key-badge {
+      display: inline-block;
+      background: #fef3c7;
+      color: #d97706;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 12px;
+    }
+
+    /* Notes */
+    .notes {
+      color: #92400e;
+      font-style: italic;
+      font-size: 11px;
+      background: #fffbeb;
+      border-left: 2px solid #f59e0b;
+      padding: 4px 8px;
+      margin-top: 4px;
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Break row */
+    .break-row td {
+      background: repeating-linear-gradient(45deg, #fef9e7, #fef9e7 5px, #fffdf0 5px, #fffdf0 10px) !important;
+      border: 1px dashed #f59e0b;
+      text-align: center;
+      color: #d97706;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.1em;
+      padding: 8px;
+    }
+
+    /* Footer */
+    .print-footer {
+      margin-top: 30px;
+      padding-top: 12px;
+      border-top: 1px solid #e9d5ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #aaa;
+      font-size: 10px;
+    }
+
+    /* General notes */
+    .general-notes {
+      background: #fdf8ff;
+      border: 1px solid #e9d5ff;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 20px;
+      font-size: 12px;
+      color: #4a4a6a;
+    }
+
+    .general-notes-title {
+      font-weight: 600;
+      color: #7c3aed;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+
+    @media print {
+      body { padding: 15px 20px; }
+      .print-header { margin-bottom: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="print-header">
+  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <div>
+      <div class="logo">♪ MariFá</div>
+      <h1 class="show-name">{{ show.name }}</h1>
+      <div class="show-meta">
+        <span>📅 {{ show.date.strftime('%d de %B de %Y') }}</span>
+        {% if show.venue %}<span>📍 {{ show.venue }}</span>{% endif %}
+        {% if show.city %}<span>🏙 {{ show.city }}</span>{% endif %}
+      </div>
+    </div>
+    <div style="text-align: right; font-size: 11px; color: #999;">
+      <p>Generado por MariFá</p>
+      <p>{{ now.strftime('%d/%m/%Y %H:%M') if now else '' }}</p>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+{% set total_songs = items|selectattr('is_break', 'equalto', False)|list|length %}
+<div class="stats-bar">
+  <div class="stat">
+    <div class="stat-value">{{ total_songs }}</div>
+    <div class="stat-label">Canciones</div>
+  </div>
+  <div class="stat">
+    <div class="stat-value">{{ show.total_duration_display }}</div>
+    <div class="stat-label">Duración total</div>
+  </div>
+  {% if show.date %}
+  <div class="stat">
+    <div class="stat-value">{{ show.date.strftime('%d/%m') }}</div>
+    <div class="stat-label">Fecha</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- NOTAS GENERALES -->
+{% if show.general_notes %}
+<div class="general-notes">
+  <p class="general-notes-title">📋 Notas del show</p>
+  <p>{{ show.general_notes }}</p>
+</div>
+{% endif %}
+
+<!-- SETLIST TABLE -->
+<table class="setlist-table">
+  <thead>
+    <tr>
+      <th style="width: 50px;">#</th>
+      <th>Canción</th>
+      <th style="width: 100px;">Tonalidad</th>
+      <th style="width: 70px;">BPM</th>
+      <th style="width: 70px;">Duración</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% set song_counter = namespace(n=0) %}
+    {% for item in items %}
+
+      {% if item.is_break %}
+      <tr class="break-row">
+        <td colspan="5">⏸ {{ item.break_label or 'INTERMEDIO' }}</td>
+      </tr>
+
+      {% else %}
+      {% set song_counter.n = song_counter.n + 1 %}
+      <tr>
+        <td>
+          <span class="pos-number">{{ song_counter.n }}</span>
+        </td>
+        <td>
+          <p class="song-title">{{ item.song.title }}</p>
+          <p class="song-artist">{{ item.song.original_artist or '' }}</p>
+          <span class="genre-badge">{{ item.song.genre_emoji }} {{ item.song.genre }}</span>
+          {% set display_notes = item.notes_override or item.song.musician_notes %}
+          {% if display_notes %}
+          <div class="notes">{{ display_notes }}</div>
+          {% endif %}
+        </td>
+        <td>
+          {% if item.song.key %}
+          <span class="key-badge">{{ item.song.key }}</span>
+          {% else %}
+          <span style="color: #ccc;">—</span>
+          {% endif %}
+        </td>
+        <td style="color: #666;">
+          {{ item.song.bpm or '—' }}
+        </td>
+        <td style="color: #666;">
+          {{ item.song.duration_display }}
+        </td>
+      </tr>
+      {% endif %}
+
+    {% endfor %}
+  </tbody>
+</table>
+
+<!-- FOOTER -->
+<div class="print-footer">
+  <span>♪ MariFá — Gestión de Setlists</span>
+  <span>{{ show.name }} · {{ show.date.strftime('%d/%m/%Y') }}</span>
+</div>
+
+</body>
+</html>

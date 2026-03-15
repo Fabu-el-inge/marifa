@@ -1,0 +1,681 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if song %}Editar Canción{% else %}Nueva Canción{% endif %}{% endblock %}
+{% block page_title %}{% if song %}Editar Canción{% else %}Nueva Canción{% endif %}{% endblock %}
+{% block page_subtitle %}{% if song %}{{ song.title }}{% else %}Agregar al catálogo{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ request.args.get('next') or url_for('songs.index') }}" class="btn btn-ghost btn-sm gap-2 text-gray-700">
+  <i class="fas fa-arrow-left"></i> {% if request.args.get('next') %}Volver{% else %}Catálogo{% endif %}
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="marifa-card p-8">
+    <div class="mb-6">
+      <h2 class="font-serif text-2xl text-gray-900 mb-1">
+        {% if song %}✏️ Editar Canción{% else %}🎵 Nueva Canción{% endif %}
+      </h2>
+      <div class="staff-divider"></div>
+    </div>
+
+    <!-- Buscar / Importar desde YouTube -->
+    <div class="mb-6 p-4 rounded-xl border-2 border-dashed" style="border-color:#fecdd3; background:#fff8f8;">
+      <p class="text-sm font-medium text-gray-700 mb-3">
+        <i class="fab fa-youtube mr-2" style="color:#ff0000;"></i>Buscar en YouTube
+        <span class="text-xs text-gray-400 ml-1">— Encontrá la canción y auto-completá los campos</span>
+      </p>
+
+      <!-- Buscador -->
+      <div class="flex gap-2 mb-2">
+        <input type="text" id="yt-search"
+               class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
+               placeholder="Buscá por nombre: ej. La Puerta — Aria de Triana" />
+        <button type="button" onclick="searchYoutube()"
+                id="yt-search-btn"
+                class="btn btn-sm px-4 font-semibold flex-shrink-0"
+                style="background:#ff0000; color:white; border:none;">
+          <i class="fas fa-search mr-1"></i>Buscar
+        </button>
+      </div>
+
+      <!-- O pegar link directo -->
+      <div class="flex gap-2 mb-2">
+        <input type="text" id="yt-url"
+               class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
+               placeholder="O pegá el link de YouTube directamente..." />
+        <button type="button" onclick="importFromYoutube()"
+                id="yt-btn"
+                class="btn btn-sm px-4 font-semibold flex-shrink-0"
+                style="background:#cc0000; color:white; border:none;">
+          <i class="fas fa-link mr-1"></i>Importar
+        </button>
+      </div>
+
+      <!-- Resultados de búsqueda -->
+      <div id="yt-results" style="display:none;" class="mt-3 space-y-2 max-h-72 overflow-y-auto"></div>
+      <div id="yt-result" class="mt-2" style="display:none;"></div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data">
+      {{ form.hidden_tag() }}
+
+      <div class="space-y-5">
+
+        <!-- Título -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fas fa-music mr-2 text-violet-600"></i>Título *
+            </span>
+          </label>
+          <input type="text" name="title" id="title"
+                 value="{{ form.title.data or '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 placeholder="Nombre de la canción"
+                 required />
+          {% if form.title.errors %}<span class="text-red-400 text-xs">{{ form.title.errors[0] }}</span>{% endif %}
+        </div>
+
+        <!-- Artista original -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fas fa-user mr-2 text-violet-600"></i>Artista original
+            </span>
+          </label>
+          <input type="text" name="original_artist" id="original_artist"
+                 value="{{ form.original_artist.data or '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 placeholder="Ej: Mercedes Sosa, Aretha Franklin..." />
+        </div>
+
+        <!-- Género -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fas fa-tag mr-2 text-violet-600"></i>Género *
+            </span>
+          </label>
+          <select name="genre" id="genre"
+                  class="marifa-input w-full px-4 py-3 text-gray-900">
+            {% for value, label in form.genre.choices %}
+            <option value="{{ value }}" {% if form.genre.data == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Tonalidad + BPM -->
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-700">
+                <i class="fas fa-key mr-2 text-yellow-500"></i>Tonalidad
+              </span>
+            </label>
+            <input type="text" name="key" id="key"
+                   value="{{ form.key.data or '' }}"
+                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   placeholder="Ej: La menor, Re mayor" />
+            <div class="flex items-center gap-2 mt-1">
+              <span class="text-xs text-gray-400">Escribila manualmente</span>
+            </div>
+          </div>
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text text-gray-700">
+                <i class="fas fa-heartbeat mr-2 text-red-400"></i>BPM
+              </span>
+            </label>
+            <input type="number" name="bpm" id="bpm"
+                   value="{{ form.bpm.data or '' }}"
+                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   placeholder="120" min="1" max="400" />
+          </div>
+        </div>
+
+
+        <!-- Duración -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fas fa-clock mr-2 text-violet-600"></i>Duración
+            </span>
+          </label>
+          <div class="flex items-center gap-3">
+            <div class="relative flex-1">
+              <input type="number" name="duration_min" id="duration_min"
+                     value="{{ form.duration_min.data if form.duration_min.data is not none else '' }}"
+                     class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                     placeholder="3" min="0" max="60" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">min</span>
+            </div>
+            <span class="text-gray-600 font-bold">:</span>
+            <div class="relative flex-1">
+              <input type="number" name="duration_sec_part" id="duration_sec_part"
+                     value="{{ form.duration_sec_part.data if form.duration_sec_part.data is not none else '' }}"
+                     class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                     placeholder="30" min="0" max="59" />
+              <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">seg</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notas para músicos -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fas fa-sticky-note mr-2 text-yellow-500"></i>Notas para músicos
+            </span>
+            <span class="label-text-alt text-gray-600 text-xs">Indicaciones técnicas, arreglos, etc.</span>
+          </label>
+          <textarea name="musician_notes" id="musician_notes"
+                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                    style="min-height:80px; resize:vertical;"
+                    placeholder="Ej: Intro con piano solo, modular a Re en el coro final...">{{ form.musician_notes.data or '' }}</textarea>
+        </div>
+
+        <!-- Link de YouTube -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700">
+              <i class="fab fa-youtube mr-2" style="color:#ff0000;"></i>Link de YouTube
+            </span>
+            <span class="label-text-alt text-xs text-gray-400">Para reproducir desde el setlist</span>
+          </label>
+          <input type="text" name="youtube_url" id="youtube_url"
+                 value="{{ form.youtube_url.data or '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 placeholder="https://www.youtube.com/watch?v=..." />
+        </div>
+
+        <!-- Letra (colapsable) -->
+        <div x-data="{ open: {{ 'true' if (form.lyrics.data) else 'false' }}, init() { window._lyricsOpen = this.open; } }">
+          <div class="flex items-center gap-3 flex-wrap mb-2">
+            <button type="button" id="lyrics-toggle"
+                    @click="open = !open; window._lyricsOpen = open; if (open) $nextTick(() => autoResize(document.getElementById('lyrics')))"
+                    class="flex items-center gap-2 text-gray-700 hover:text-gray-800 text-sm transition-colors">
+              <i class="fas fa-chevron-right transition-transform" :class="{ 'rotate-90': open }"></i>
+              <i class="fas fa-align-left mr-1 text-violet-600"></i>
+              Letra / Acordes (opc.)
+            </button>
+            <button type="button" id="fetch-lyrics-btn" onclick="fetchLyricsAuto()"
+                    class="btn btn-xs gap-1 font-medium"
+                    style="background:#ede9fe; color:#6d28d9; border:none;">
+              <i class="fas fa-magic"></i>Buscar letra
+            </button>
+            <button type="button" id="generate-chords-btn" onclick="generateChords()"
+                    class="btn btn-xs gap-1 font-medium"
+                    style="background:#fef3c7; color:#92400e; border:none;">
+              <i class="fas fa-guitar"></i>Generar acordes
+            </button>
+            <button type="button" id="rec-btn" onclick="toggleRecording()"
+                    class="btn btn-xs gap-1 font-medium"
+                    style="background:#fee2e2; color:#dc2626; border:none;">
+              <i id="rec-icon" class="fas fa-microphone"></i><span id="rec-btn-label">Grabar</span>
+            </button><button type="button" onclick="document.getElementById('rec-file-input').click()"
+                    class="btn btn-xs gap-1 font-medium"
+                    style="background:#f3e8ff; color:#7c3aed; border:none; margin-left:-2px;">
+              <i class="fas fa-upload"></i>Audio
+            </button>
+            <span id="fetch-lyrics-status" class="text-xs" style="display:none;"></span>
+            <span id="generate-chords-status" class="text-xs" style="display:none;"></span>
+            <span id="rec-timer" class="text-xs font-bold text-red-500" style="display:none;">0:00</span>
+          </div>
+          <!-- Grabación: feedback inline -->
+          {% if song and song.recording_path %}
+          <div id="existing-rec" class="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+            <span class="text-xs text-green-700 font-semibold flex-shrink-0"><i class="fas fa-check-circle mr-1"></i>Grabación</span>
+            <audio controls class="flex-1" style="height:28px;">
+              <source src="{{ url_for('songs.serve_recording', filename=song.recording_path) }}" />
+            </audio>
+            <button type="button" onclick="deleteRecording({{ song.id }})" class="text-xs text-red-400 hover:text-red-600 flex-shrink-0">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+          {% endif %}
+          <div id="rec-state-done" style="display:none;" class="flex items-center gap-2 mb-2 px-2 py-1.5 rounded-lg" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+            <audio id="rec-player" controls class="flex-1" style="height:28px;"></audio>
+            <button type="button" onclick="discardRec()" class="text-xs text-gray-400 hover:text-red-400"><i class="fas fa-undo"></i></button>
+          </div>
+          <input type="file" name="recording" id="rec-file-input" style="display:none;"
+                 accept="audio/*,.m4a,.ogg,.webm,.mp3,.wav,.opus" />
+          <div x-show="open" x-transition>
+            <textarea name="lyrics" id="lyrics"
+                      class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 font-mono text-sm"
+                      style="min-height:200px; resize:vertical;"
+                      placeholder="Letra, cifrado de acordes, etc...">{{ form.lyrics.data or '' }}</textarea>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="flex gap-3 mt-8">
+        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+          {% if song %}
+            <i class="fas fa-save mr-2"></i>Guardar cambios
+          {% else %}
+            <i class="fas fa-plus mr-2"></i>Agregar al Catálogo
+          {% endif %}
+        </button>
+        <a href="{{ request.args.get('next') or url_for('songs.index') }}" class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const CSRF = document.querySelector('meta[name="csrf-token"]').content;
+
+// ── Auto-resize textareas ─────────────────────────────────────────────────────
+function autoResize(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.max(el.scrollHeight, parseInt(el.style.minHeight) || 80) + 'px';
+}
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('textarea').forEach(function(ta) {
+    if (ta.offsetParent !== null) autoResize(ta);
+    ta.addEventListener('input', function() { autoResize(this); });
+  });
+  // Segundo intento por si Alpine no terminó de inicializar
+  setTimeout(function() {
+    document.querySelectorAll('textarea').forEach(function(ta) {
+      if (ta.offsetParent !== null) autoResize(ta);
+    });
+  }, 200);
+});
+
+// ── Grabación de voz ──────────────────────────────────────────────────────────
+var _mr = null, _chunks = [], _timerInt = null, _recSecs = 0, _isRec = false;
+
+async function toggleRecording() {
+  if (_isRec) {
+    if (_mr && _mr.state !== 'inactive') _mr.stop();
+    clearInterval(_timerInt);
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      _chunks = [];
+      _mr = new MediaRecorder(stream);
+
+      _mr.ondataavailable = function(e) { if (e.data.size > 0) _chunks.push(e.data); };
+
+      _mr.onstop = function() {
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        const mime = _mr.mimeType || 'audio/webm';
+        const blob = new Blob(_chunks, { type: mime });
+
+        const player = document.getElementById('rec-player');
+        player.src = URL.createObjectURL(blob);
+
+        const ext = mime.includes('ogg') ? 'ogg' : mime.includes('mp4') ? 'mp4' : 'webm';
+        const file = new File([blob], 'rec.' + ext, { type: mime });
+        try {
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          document.getElementById('rec-file-input').files = dt.files;
+        } catch(e) {}
+
+        setRecState('done');
+        _isRec = false;
+      };
+
+      _mr.start(100);
+      _isRec = true;
+      _recSecs = 0;
+      document.getElementById('rec-timer').textContent = '0:00';
+      _timerInt = setInterval(function() {
+        _recSecs++;
+        var m = Math.floor(_recSecs / 60), s = _recSecs % 60;
+        document.getElementById('rec-timer').textContent = m + ':' + (s < 10 ? '0' : '') + s;
+      }, 1000);
+      setRecState('recording');
+    } catch(err) {
+      alert('No se pudo acceder al micrófono. Verificá que el navegador tiene permiso.');
+    }
+  }
+}
+
+function setRecState(state) {
+  document.getElementById('rec-state-done').style.display = state === 'done' ? 'flex' : 'none';
+  var icon  = document.getElementById('rec-icon');
+  var label = document.getElementById('rec-btn-label');
+  var timer = document.getElementById('rec-timer');
+  if (state === 'recording') {
+    icon.className = 'fas fa-stop';
+    label.textContent = 'Parar';
+    timer.style.display = 'inline';
+  } else {
+    icon.className = 'fas fa-microphone';
+    label.textContent = 'Grabar';
+    timer.style.display = 'none';
+    timer.textContent = '0:00';
+  }
+}
+
+function discardRec() {
+  document.getElementById('rec-player').src = '';
+  document.getElementById('rec-file-input').value = '';
+  setRecState('idle');
+}
+
+// Cargar audio de referencia desde archivo
+document.addEventListener('DOMContentLoaded', function() {
+  var fi = document.getElementById('rec-file-input');
+  if (fi) {
+    fi.addEventListener('change', function() {
+      var file = this.files[0];
+      if (!file) return;
+      document.getElementById('rec-player').src = URL.createObjectURL(file);
+      setRecState('done');
+    });
+  }
+});
+
+// Buscar letra automáticamente
+function fetchLyricsAuto() {
+  var title  = (document.getElementById('title').value || '').trim();
+  var artist = (document.getElementById('original_artist').value || '').trim();
+  if (!title) { alert('Completá el título de la canción primero.'); return; }
+
+  var btn    = document.getElementById('fetch-lyrics-btn');
+  var status = document.getElementById('fetch-lyrics-status');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+  status.style.display = 'none';
+
+  fetch('/songs/api/fetch-lyrics', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ title: title, artist: artist })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-magic"></i>Buscar letra';
+    if (data.error) {
+      status.textContent = data.error;
+      status.style.color = '#ef4444';
+      status.style.display = 'inline';
+      return;
+    }
+    // Abrir sección de letra si está cerrada
+    if (!window._lyricsOpen) {
+      document.getElementById('lyrics-toggle').click();
+    }
+    setTimeout(function() {
+      var ta = document.getElementById('lyrics');
+      ta.value = data.lyrics;
+      autoResize(ta);
+      status.textContent = '✓ Letra encontrada';
+      status.style.color = '#16a34a';
+      status.style.display = 'inline';
+      ta.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-magic"></i>Buscar letra';
+    status.textContent = 'Error de conexión.';
+    status.style.color = '#ef4444';
+    status.style.display = 'inline';
+  });
+}
+
+function deleteRecording(songId) {
+  if (!confirm('¿Eliminar la grabación guardada?')) return;
+  fetch('/songs/' + songId + '/delete-recording', {
+    method: 'POST',
+    headers: { 'X-CSRFToken': CSRF }
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(d) {
+    if (d.ok) {
+      var el = document.getElementById('existing-rec');
+      if (el) el.remove();
+    }
+  });
+}
+
+
+// ── YouTube helpers ──────────────────────────────────────────────────────────
+function ytEmbedUrl(url) {
+  var m = url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return m ? 'https://www.youtube.com/embed/' + m[1] : '';
+}
+
+function toggleYtPreview() {
+  var container = document.getElementById('yt-inline-player');
+  if (!container || !window._ytPreviewEmbed) return;
+  if (container.style.display === 'none' || !container.style.display) {
+    var sep = window._ytPreviewEmbed.includes('?') ? '&' : '?';
+    container.innerHTML = '<iframe src="' + window._ytPreviewEmbed + sep + 'autoplay=1&controls=1&modestbranding=1&rel=0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="width:100%; height:100%; border:none;"></iframe>';
+    container.style.display = 'block';
+  } else {
+    container.innerHTML = '';
+    container.style.display = 'none';
+  }
+}
+
+// ── Buscar en YouTube ───────────────────────────────────────────────────────
+function searchYoutube() {
+  const q = document.getElementById('yt-search').value.trim();
+  const btn = document.getElementById('yt-search-btn');
+  const resultsEl = document.getElementById('yt-results');
+  if (!q) return;
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Buscando...';
+  resultsEl.innerHTML = '';
+  resultsEl.style.display = 'none';
+
+  fetch('/songs/api/search-youtube', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ q })
+  })
+  .then(r => r.json())
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search mr-1"></i>Buscar';
+    if (data.error) {
+      resultsEl.innerHTML = `<p class="text-xs text-red-500">${data.error}</p>`;
+      resultsEl.style.display = 'block';
+      return;
+    }
+    renderYtResults(data.results);
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search mr-1"></i>Buscar';
+    resultsEl.innerHTML = '<p class="text-xs text-red-500">Error de conexión.</p>';
+    resultsEl.style.display = 'block';
+  });
+}
+
+function renderYtResults(results) {
+  const el = document.getElementById('yt-results');
+  el.innerHTML = '';
+  results.forEach(function(v) {
+    const item = document.createElement('div');
+    item.className = 'flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-red-50 border border-gray-100 transition-colors';
+    item.innerHTML = `
+      <img src="${v.thumbnail}" class="w-16 h-10 rounded object-cover flex-shrink-0" />
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold text-gray-800 truncate">${v.title}</p>
+        <p class="text-xs text-gray-500 truncate">${v.author}${v.duration_display ? ' · ' + v.duration_display : ''}</p>
+      </div>
+      <i class="fas fa-plus-circle text-red-400 flex-shrink-0"></i>
+    `;
+    item.addEventListener('click', function() { applyYtResult(v); });
+    el.appendChild(item);
+  });
+  el.style.display = 'block';
+}
+
+function applyYtResult(v) {
+  // Intentar separar "Artista - Título" del título del video
+  let title = v.title, artist = v.author;
+  if (v.title.includes(' - ')) {
+    const parts = v.title.split(' - ', 2);
+    artist = parts[0].trim();
+    title  = parts[1].trim();
+  }
+  // Limpiar sufijos
+  title = title.replace(/\((Official\s*(Music\s*)?Video|Audio|Lyric.*?|HD|4K|Remaster.*?)\)/gi, '').trim();
+
+  document.getElementById('title').value          = title;
+  document.getElementById('original_artist').value = artist;
+  document.getElementById('youtube_url').value     = v.url;
+
+  // Duración
+  if (v.duration) {
+    document.getElementById('duration_min').value      = Math.floor(v.duration / 60);
+    document.getElementById('duration_sec_part').value = v.duration % 60;
+  }
+
+  // Confirmación visual con botón escuchar
+  const embedUrl = ytEmbedUrl(v.url);
+  const resultEl = document.getElementById('yt-result');
+  resultEl.innerHTML = `<div class="p-2 rounded-lg" style="background:#f0fdf4;">
+    <div class="flex items-center gap-2 mb-2">
+      <img src="${v.thumbnail}" class="w-12 h-8 rounded object-cover flex-shrink-0" />
+      <div class="flex-1 min-w-0">
+        <p class="text-xs font-semibold text-green-700"><i class="fas fa-check-circle mr-1"></i>Canción seleccionada</p>
+        <p class="text-xs text-gray-600 truncate"><strong>${title}</strong> · ${artist}</p>
+      </div>
+      <button onclick="toggleYtPreview()" class="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-lg text-white" style="background:#e11d48;">
+        <i class="fab fa-youtube mr-1"></i>Escuchar
+      </button>
+    </div>
+    <div id="yt-inline-player" style="display:none; width:100%; height:60px; border-radius:8px; overflow:hidden; background:#000;"></div>
+  </div>`;
+  window._ytPreviewEmbed = embedUrl;
+  window._ytPreviewOpen  = false;
+  resultEl.style.display = 'block';
+  document.getElementById('yt-results').style.display = 'none';
+  document.getElementById('title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+// ── Importar desde link directo ─────────────────────────────────────────────
+function importFromYoutube() {
+  const url = document.getElementById('yt-url').value.trim();
+  const btn = document.getElementById('yt-btn');
+  const resultEl = document.getElementById('yt-result');
+  if (!url) {
+    resultEl.innerHTML = '<p class="text-xs text-red-500">Pegá un link de YouTube primero.</p>';
+    resultEl.style.display = 'block';
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>...';
+
+  fetch('/songs/api/fetch-youtube', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ url })
+  })
+  .then(r => r.json())
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-link mr-1"></i>Importar';
+    if (data.error) {
+      resultEl.innerHTML = `<p class="text-xs text-red-500">${data.error}</p>`;
+      resultEl.style.display = 'block';
+      return;
+    }
+    document.getElementById('title').value          = data.title;
+    document.getElementById('original_artist').value = data.artist;
+    const ytF = document.getElementById('youtube_url');
+    if (ytF && !ytF.value) ytF.value = url;
+    const embedUrl = ytEmbedUrl(url);
+    window._ytPreviewEmbed = embedUrl;
+    window._ytPreviewOpen  = false;
+    resultEl.innerHTML = `<div class="p-2 rounded-lg" style="background:#f0fdf4;">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="flex-1 min-w-0">
+          <p class="text-xs font-semibold text-green-700"><i class="fas fa-check-circle mr-1"></i>Canción importada</p>
+          <p class="text-xs text-gray-600 truncate"><strong>${data.title}</strong> · ${data.artist}</p>
+        </div>
+        ${embedUrl ? '<button onclick="toggleYtPreview()" class="flex-shrink-0 text-xs font-semibold px-2 py-1 rounded-lg text-white" style="background:#e11d48;"><i class="fab fa-youtube mr-1"></i>Escuchar</button>' : ''}
+      </div>
+      <div id="yt-inline-player" style="display:none; width:100%; height:60px; border-radius:8px; overflow:hidden; background:#000;"></div>
+    </div>`;
+    resultEl.style.display = 'block';
+    document.getElementById('title').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-link mr-1"></i>Importar';
+    resultEl.innerHTML = '<p class="text-xs text-red-500">Error de conexión.</p>';
+    resultEl.style.display = 'block';
+  });
+}
+
+// ── Generar acordes con IA ───────────────────────────────────────────────────
+function generateChords() {
+  var lyrics  = document.getElementById('lyrics').value.trim();
+  var key     = document.getElementById('key').value.trim();
+  var title   = (document.getElementById('title')  || {}).value || '';
+  var artist  = (document.getElementById('original_artist') || {}).value || '';
+  if (!lyrics) { alert('Primero cargá la letra de la canción.'); return; }
+
+  var btn    = document.getElementById('generate-chords-btn');
+  var status = document.getElementById('generate-chords-status');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generando...';
+  status.style.display = 'none';
+
+  fetch('/songs/api/generate-chords', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+    body: JSON.stringify({ lyrics: lyrics, key: key, title: title.trim(), artist: artist.trim() })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-guitar"></i>Generar acordes';
+    if (data.error) {
+      status.textContent = data.error;
+      status.style.color = '#ef4444';
+      status.style.display = 'inline';
+      return;
+    }
+    if (!window._lyricsOpen) document.getElementById('lyrics-toggle').click();
+    setTimeout(function() {
+      var ta = document.getElementById('lyrics');
+      ta.value = data.lyrics;
+      autoResize(ta);
+      var srcLabel = data.source === 'cifraclub' ? '✓ Acordes reales (Cifra Club)'
+                   : '✓ Acordes estimados por IA';
+      status.textContent = srcLabel;
+      status.style.color = '#16a34a';
+      status.style.display = 'inline';
+      ta.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 150);
+  })
+  .catch(function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-guitar"></i>Generar acordes';
+    status.textContent = 'Error de conexión.';
+    status.style.color = '#ef4444';
+    status.style.display = 'inline';
+  });
+}
+
+// Enter en el buscador
+['yt-search', 'yt-url'].forEach(function(id) {
+  const el = document.getElementById(id);
+  if (el) el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); id === 'yt-search' ? searchYoutube() : importFromYoutube(); }
+  });
+});
+</script>
+{% endblock %}

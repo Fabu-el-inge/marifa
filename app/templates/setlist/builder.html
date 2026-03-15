@@ -1,0 +1,804 @@
+{% extends 'base.html' %}
+
+{% block title %}Setlist — {{ show.name }}{% endblock %}
+{% block page_title %}{{ show.name }}{% endblock %}
+{% block page_subtitle %}
+  {{ show.date.strftime('%d/%m/%Y') }}
+  {% if show.venue %} · {{ show.venue }}{% endif %}
+  {% if show.city %} · {{ show.city }}{% endif %}
+{% endblock %}
+
+{% block topbar_actions %}
+
+<!-- Stats del setlist -->
+<div class="flex items-center gap-3 flex-shrink-0">
+  <div class="flex items-center gap-1 px-3 py-1 rounded-lg" style="background:#f5f0ff; border:1px solid #e9d5ff;">
+    <i class="fas fa-music text-xs" style="color:#7c3aed;"></i>
+    <span class="font-black font-serif text-sm" style="color:#7c3aed;" id="song-count">{{ items|selectattr('is_break', 'equalto', False)|list|length }}</span>
+    <span class="text-xs" style="color:#9ca3af;">canciones</span>
+  </div>
+  <div class="flex items-center gap-1 px-3 py-1 rounded-lg" style="background:#fffbeb; border:1px solid #fde68a;">
+    <i class="fas fa-clock text-xs" style="color:#d97706;"></i>
+    <span class="font-bold text-sm" style="color:#d97706;" id="total-duration">{{ show.total_duration_display }}</span>
+  </div>
+</div>
+
+<!-- Chip músicos del show -->
+{% set _musicians = show.musicians.all() %}
+{% if _musicians %}
+<div class="relative flex-shrink-0" id="musicians-chip-wrapper">
+  <button type="button" onclick="toggleMusiciansPopover()"
+          class="flex items-center gap-1 px-2 py-1 rounded-lg"
+          style="background:#fdf4ff; border:1px solid #e9d5ff; cursor:pointer;">
+    <i class="fas fa-users text-xs" style="color:#7c3aed;"></i>
+    <span class="text-xs font-medium" style="color:#7c3aed;">
+      {{ _musicians|length }} músico{{ 's' if _musicians|length != 1 else '' }}
+    </span>
+    <i class="fas fa-chevron-down text-xs" id="musicians-chip-arrow"
+       style="color:#c4b5fd; transition:transform 0.2s;"></i>
+  </button>
+
+  <!-- Popover con info de músicos -->
+  <div id="musicians-popover"
+       style="display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:300;
+              background:white; border:1px solid #e9d5ff; border-radius:16px;
+              box-shadow:0 8px 32px rgba(124,58,237,0.18); min-width:230px; overflow:hidden;">
+    <div class="px-4 py-2 border-b border-gray-100">
+      <p class="text-xs font-bold uppercase tracking-wider" style="color:#9ca3af;">Músicos del show</p>
+    </div>
+    {% for sm in _musicians %}
+    {% set m = sm.musician %}
+    <div class="flex items-center gap-3 px-4 py-3" style="border-bottom:1px solid #faf5ff;">
+      <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+           style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+        {{ m.name[0].upper() }}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="text-sm font-semibold truncate" style="color:#1e1b2e;">{{ m.name }}</p>
+        <p class="text-xs" style="color:#6b7280;">{{ m.instrument_emoji }} {{ m.instrument }}</p>
+      </div>
+      {% if m.whatsapp_link %}
+      <a href="{{ m.whatsapp_link }}" target="_blank"
+         class="flex-shrink-0 text-xs px-2 py-1 rounded-lg"
+         style="background:#f0fdf4; color:#25D366; border:1px solid #bbf7d0;"
+         title="WhatsApp de {{ m.name }}" onclick="event.stopPropagation()">
+        <i class="fab fa-whatsapp"></i>
+      </a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% if show.is_public %}
+<!-- Link público compacto -->
+<div class="flex items-center gap-1 px-2 py-1 rounded-lg"
+     style="background:#f0fdf4; border:1px solid #bbf7d0; max-width:200px;">
+  <i class="fas fa-globe text-xs" style="color:#059669; flex-shrink:0;"></i>
+  <span class="text-xs font-medium truncate" style="color:#059669;">
+    {{ request.host_url }}p/{{ show.public_token }}
+  </span>
+  <button onclick="copyPublicLink()" class="btn btn-xs btn-ghost p-0 w-5 h-5 flex-shrink-0" style="color:#059669;" title="Copiar">
+    <i class="fas fa-copy text-xs"></i>
+  </button>
+  <button type="button" onclick="shareWhatsapp()"
+          class="btn btn-xs btn-ghost p-0 w-5 h-5 flex-shrink-0" style="color:#25D366;" title="Compartir por WhatsApp">
+    <i class="fab fa-whatsapp text-xs"></i>
+  </button>
+</div>
+{% endif %}
+
+<!-- Toggle público -->
+<form method="POST" action="{{ url_for('shows.toggle_public', show_id=show.id) }}" class="inline">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+  <button type="submit"
+          class="btn btn-sm gap-2 {% if show.is_public %}btn-success{% else %}btn-ghost border-gray-300 text-gray-700{% endif %}">
+    <i class="fas fa-{% if show.is_public %}globe{% else %}lock{% endif %}"></i>
+    {% if show.is_public %}Público{% else %}Privado{% endif %}
+  </button>
+</form>
+
+<a href="{{ url_for('setlist.export_pdf', show_id=show.id) }}" class="btn btn-gold btn-sm gap-2">
+  <i class="fas fa-file-pdf"></i> PDF
+</a>
+
+<a href="{{ url_for('shows.edit', show_id=show.id) }}?next={{ url_for('setlist.builder', show_id=show.id) }}" class="btn btn-ghost btn-sm text-gray-700">
+  <i class="fas fa-edit"></i>
+</a>
+<a href="{{ url_for('shows.index') }}" class="btn btn-ghost btn-sm text-gray-700">
+  <i class="fas fa-arrow-left"></i>
+</a>
+{% endblock %}
+
+{% block content %}
+
+<!-- Modal de Confirmación Eliminar -->
+<div id="confirm-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.4); display:none;">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xs p-6 text-center">
+    <div class="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+         style="background:#fff1f2;">
+      <i class="fas fa-trash text-lg" style="color:#ef4444;"></i>
+    </div>
+    <h3 class="font-serif text-lg font-bold mb-1" style="color:#1e1b2e;">¿Quitar canción?</h3>
+    <p id="confirm-modal-name" class="text-sm text-gray-500 mb-5"></p>
+    <div class="flex gap-3">
+      <button onclick="closeConfirmModal()"
+              class="btn btn-ghost btn-sm flex-1 border border-gray-200 text-gray-600">
+        Cancelar
+      </button>
+      <button id="confirm-modal-ok" onclick="confirmDeleteAction()"
+              class="btn btn-sm flex-1 text-white font-bold"
+              style="background:#ef4444; border:none;">
+        Quitar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Letra -->
+<div id="lyrics-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.5); display:none;"
+     onclick="if(event.target===this) closeLyricsModal()">
+  <div id="lyrics-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" style="transition: max-width 0.25s ease, max-height 0.25s ease;">
+    <div class="flex items-start justify-between p-5 border-b border-gray-100">
+      <div class="flex-1 pr-3">
+        <h3 id="modal-title" class="font-serif text-xl font-bold" style="color:#1e1b2e;"></h3>
+        <p id="modal-artist" class="text-sm text-gray-500 mt-0.5"></p>
+        <div class="flex items-center gap-3 mt-1 flex-wrap" id="modal-meta"></div>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <a id="modal-print-btn" href="#" target="_blank"
+           class="btn btn-xs btn-ghost text-gray-500 hover:text-violet-600" title="Imprimir / descargar letra">
+          <i class="fas fa-print text-xs"></i>
+        </a>
+        <button id="modal-rec-btn" onclick="toggleModalRec()"
+                class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-red-500" title="Grabar referencia de voz">
+          <i class="fas fa-microphone text-xs"></i>
+        </button>
+        <button id="modal-chord-lang-btn" onclick="toggleChordLang()"
+                class="btn btn-ghost btn-sm text-gray-400 hover:text-amber-600 font-bold text-xs"
+                title="Cambiar notación de acordes (Do/C)" style="min-width:2rem;">Do</button>
+        <button id="modal-expand-btn" onclick="toggleExpandLyrics()"
+                class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-violet-600" title="Expandir / dos columnas">
+          <i class="fas fa-expand text-xs"></i>
+        </button>
+        <button onclick="closeLyricsModal()" class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="flex-1 overflow-y-auto p-5">
+      <div id="modal-lyrics" class="text-sm text-gray-700 leading-relaxed font-mono"></div>
+      <div id="modal-notes" class="mt-4 p-3 rounded-xl" style="background:#fdf4ff;"></div>
+      <!-- Panel de grabación rápida -->
+      <div id="modal-rec-panel" style="display:none;" class="mt-4">
+        <div style="background:#fff5f5; border:1px solid #fecaca; border-radius:0.75rem; padding:0.75rem;">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-red-600"><i class="fas fa-microphone mr-1"></i>Grabación de referencia</p>
+            <span id="modal-rec-timer" class="text-xs font-mono text-red-500" style="display:none;">0:00</span>
+          </div>
+          <div id="modal-rec-existing" style="display:none;" class="mb-2">
+            <audio id="modal-rec-existing-audio" controls class="w-full" style="height:32px;"></audio>
+            <button onclick="deleteModalRecording()" class="text-xs text-red-400 hover:text-red-600 mt-1">
+              <i class="fas fa-trash mr-1"></i>Eliminar
+            </button>
+          </div>
+          <div id="modal-rec-new" style="display:none;" class="mb-2">
+            <audio id="modal-rec-new-audio" controls class="w-full" style="height:32px;"></audio>
+            <div class="flex items-center gap-3 mt-1">
+              <button onclick="saveModalRecording()" class="text-xs font-bold text-green-600 hover:text-green-800">
+                <i class="fas fa-save mr-1"></i>Guardar
+              </button>
+              <button onclick="discardModalRec()" class="text-xs text-gray-400 hover:text-red-400">
+                <i class="fas fa-undo mr-1"></i>Descartar
+              </button>
+            </div>
+          </div>
+          <div class="flex items-center gap-3">
+            <button id="modal-rec-toggle" onclick="toggleModalRecording()"
+                    class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style="background:#ef4444; color:white; border:none; box-shadow:0 3px 10px rgba(239,68,68,0.4); cursor:pointer;">
+              <i id="modal-rec-icon" class="fas fa-microphone"></i>
+            </button>
+            <p id="modal-rec-hint" class="text-xs text-gray-500">Toca para grabar tu referencia.</p>
+          </div>
+        </div>
+      </div>
+      <!-- Audio YouTube -->
+      <div id="modal-yt-audio" class="mt-4 p-3 rounded-xl" style="background:#fff1f2; border:1px solid #fecdd3; display:none;">
+        <p class="text-xs font-bold mb-2" style="color:#e11d48;">
+          <i class="fab fa-youtube mr-1"></i>Audio de referencia (YouTube)
+        </p>
+        <button id="modal-yt-play-btn" onclick="loadYtAudio()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold text-white"
+                style="background:#e11d48;">
+          <i class="fab fa-youtube"></i> Escuchar
+        </button>
+        <div id="modal-yt-player" style="display:none; position:relative; height:52px; border-radius:6px; overflow:hidden; background:#000; margin-top:6px;">
+          <iframe id="modal-yt-iframe" src="" frameborder="0"
+                  allow="autoplay; encrypted-media"
+                  style="position:absolute; bottom:0; left:0; width:100%; height:220px; border:none;"></iframe>
+        </div>
+      </div>
+      <div id="modal-no-lyrics" class="text-center py-8 text-gray-400" style="display:none;">
+        <i class="fas fa-music text-2xl mb-2 block opacity-30"></i>
+        Esta canción no tiene letra cargada.
+        <br>
+        <a id="modal-edit-link" href="#" class="text-violet-600 text-sm hover:underline mt-2 inline-block">
+          <i class="fas fa-edit mr-1"></i>Agregar letra
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Datos de canciones para el modal -->
+<script>
+var SONGS_DATA = {
+  {% for item in items %}{% if not item.is_break %}
+  {{ item.song.id }}: {
+    title:        {{ item.song.title|tojson }},
+    artist:       {{ (item.song.original_artist or '')|tojson }},
+    lyrics:       {{ (item.song.lyrics or '')|tojson }},
+    notes:        {{ (item.song.musician_notes or '')|tojson }},
+    key:          {{ (item.song.key or '')|tojson }},
+    bpm:          {{ item.song.bpm or 'null' }},
+    duration:     {{ (item.song.duration_display or '')|tojson }},
+    genre:        {{ (item.song.genre_emoji ~ ' ' ~ item.song.genre)|tojson }},
+    editUrl:      {{ (url_for('songs.edit', song_id=item.song.id) ~ '?next=' ~ url_for('setlist.builder', show_id=show.id))|tojson }},
+    youtubeEmbed: {{ (item.song.youtube_embed_url or '')|tojson }},
+    recordingUrl: {{ (item.song.recording_url or '')|tojson }},
+    printUrl:     {{ url_for('songs.print_song', song_id=item.song.id)|tojson }}
+  }{% if not loop.last %},{% endif %}
+  {% endif %}{% endfor %}
+};
+</script>
+
+<div class="builder-bg flex gap-4 h-full" style="min-height: calc(100vh - 140px);">
+
+  <!-- ===== PANEL IZQUIERDO: CATÁLOGO ===== -->
+  <div class="w-80 flex-shrink-0 flex flex-col" style="max-height: calc(100vh - 90px); position: sticky; top: 80px;">
+    <div class="marifa-card flex flex-col h-full overflow-hidden">
+
+      <div class="p-4 border-b border-gray-800">
+        <h2 class="font-serif text-lg text-gray-900 mb-3 flex items-center gap-2">
+          <i class="fas fa-music text-violet-600"></i> Catálogo
+        </h2>
+
+        <!-- Búsqueda -->
+        <div class="relative mb-2">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm"></i>
+          <input type="text" id="catalog-search"
+                 class="marifa-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
+                 placeholder="Buscar canción..." autocomplete="off" />
+        </div>
+
+        <!-- Filtro género -->
+        <select id="catalog-genre" class="marifa-input w-full px-3 py-2 text-gray-900 text-sm mb-2">
+          <option value="">Todos los géneros</option>
+          {% for g in genres %}
+          <option value="{{ g }}">{{ g }}</option>
+          {% endfor %}
+        </select>
+
+        <!-- Ordenar -->
+        <select id="catalog-sort" class="marifa-input w-full px-3 py-2 text-gray-900 text-sm">
+          <option value="title">A–Z Título</option>
+          <option value="artist">A–Z Artista</option>
+          <option value="genre">Por género</option>
+          <option value="updated" selected>Más recientes</option>
+        </select>
+      </div>
+
+      <!-- Resultados -->
+      <div id="catalog-results" class="flex-1 overflow-y-auto p-3">
+        <div class="text-center py-4"><div class="loading-spinner mx-auto"></div></div>
+      </div>
+
+      <!-- Footer catálogo -->
+      <div class="p-3 border-t border-gray-800 space-y-1">
+        <button onclick="addBreak({{ show.id }})"
+                class="btn btn-ghost btn-sm w-full gap-2 text-xs"
+                style="color:#d97706; border:1px dashed #fcd34d;">
+          <i class="fas fa-pause-circle"></i> Insertar intermedio
+        </button>
+        <a href="{{ url_for('songs.new') }}?next={{ url_for('setlist.builder', show_id=show.id) }}" class="btn btn-ghost btn-sm w-full text-gray-600 gap-2 text-xs">
+          <i class="fas fa-plus-circle text-violet-600"></i>
+          Agregar nueva canción
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PANEL DERECHO: SETLIST ===== -->
+  <div class="flex-1 flex flex-col">
+
+      <!-- Alerta 2h (fuera de card) -->
+      <div id="duration-warning" class="hidden mb-3 p-2 rounded-lg flex items-center gap-2 text-sm" style="background:#fff1f2; border:1px solid #fecdd3; color:#be123c;">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span>El setlist supera las 2 horas. ¡Considerá reducir algunas canciones!</span>
+      </div>
+
+    <!-- LISTA DE SETLIST -->
+    <div class="marifa-card flex-1 p-4">
+      <div id="setlist-list">
+
+        {% if not items %}
+        <div id="setlist-empty" class="empty-state py-12">
+          <div class="empty-state-icon">🎤</div>
+          <p class="text-gray-600 mb-2">El setlist está vacío</p>
+          <p class="text-gray-600 text-sm">Hacé clic en <span class="text-violet-600">+</span> en una canción del catálogo para agregarla</p>
+        </div>
+        {% else %}
+        <div id="setlist-empty" style="display:none"></div>
+        {% endif %}
+
+        {% set song_count = namespace(n=0) %}
+        {% for item in items %}
+
+          {% if item.is_break %}
+          <!-- INTERMEDIO -->
+          <div class="setlist-item is-break flex items-center gap-3 p-3 mb-2"
+               style="cursor:grab;"
+               data-item-id="{{ item.id }}">
+            <div class="flex-1 text-center">
+              <span class="text-yellow-400 font-bold tracking-widest text-sm">
+                ⏸ {{ item.break_label or 'INTERMEDIO' }}
+              </span>
+            </div>
+            <button onclick="removeItem({{ show.id }}, {{ item.id }})"
+                    class="btn btn-xs btn-ghost text-gray-600 hover:text-red-400">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          {% else %}
+          <!-- CANCIÓN — tarjeta -->
+          {% set song_count.n = song_count.n + 1 %}
+          <div class="bg-white rounded-2xl border border-gray-100 mb-3 overflow-hidden slide-in"
+               style="cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,0.06); transition: box-shadow 0.2s, transform 0.2s;"
+               data-item-id="{{ item.id }}"
+               data-song-id="{{ item.song_id }}"
+               onclick="openLyricsModal({{ item.song.id }})"
+               onmouseover="this.style.boxShadow='0 6px 24px rgba(244,63,94,0.12)'; this.style.transform='translateY(-1px)';"
+               onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)'; this.style.transform='';">
+
+            <div class="flex items-stretch">
+              <!-- Número lateral -->
+              <div class="flex items-center justify-center px-4 flex-shrink-0"
+                   style="background: linear-gradient(180deg, #fdf8f5 0%, #f9f3ee 100%); border-right: 1px solid #f0e8f5; min-width:60px;">
+                <span class="setlist-number">{{ song_count.n }}</span>
+              </div>
+
+              <!-- Contenido principal -->
+              <div class="flex-1 min-w-0 p-4">
+                <div class="flex items-start justify-between gap-2 mb-1">
+                  <p class="font-serif font-bold leading-tight" style="font-size:1.1rem; color:#1e1b2e;">
+                    {{ item.song.title }}
+                  </p>
+                  {% if item.song.key %}
+                  <span class="flex-shrink-0 font-bold text-xs px-2 py-0.5 rounded-full"
+                        style="background:#fffbeb; color:#d97706; border:1px solid #fde68a;">
+                    {{ item.song.key }}
+                  </span>
+                  {% endif %}
+                </div>
+                <p class="text-sm mb-2" style="color:#6b7280;">{{ item.song.original_artist or '' }}</p>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="genre-badge badge {{ item.song.genre_badge }} text-xs">
+                    {{ item.song.genre_emoji }} {{ item.song.genre }}
+                  </span>
+                  {% if item.song.bpm %}
+                  <span class="text-xs" style="color:#9ca3af;">{{ item.song.bpm }} BPM</span>
+                  {% endif %}
+                  {% if item.song.duration_sec %}
+                  <span class="text-xs" style="color:#9ca3af;">⏱ {{ item.song.duration_display }}</span>
+                  {% endif %}
+                </div>
+                {% set display_notes = item.notes_override or item.song.musician_notes %}
+                {% if display_notes %}
+                <div class="mt-2 px-3 py-2 rounded-xl text-xs italic"
+                     style="background:#fffbeb; border-left:3px solid #fcd34d; color:#92400e;">
+                  <i class="fas fa-sticky-note mr-1"></i>{{ display_notes }}
+                </div>
+                {% endif %}
+                <div id="notes-section-{{ item.id }}" style="display:none;" class="mt-2">
+                  <textarea
+                    id="notes-{{ item.id }}"
+                    class="notes-area w-full text-xs p-2 resize-none"
+                    rows="2"
+                    placeholder="Notas específicas para este show..."
+                    onblur="saveNotes({{ show.id }}, {{ item.id }})">{{ item.notes_override or '' }}</textarea>
+                </div>
+              </div>
+
+              <!-- Acciones laterales -->
+              <div class="flex flex-col items-center justify-center gap-1 px-2 flex-shrink-0"
+                   style="border-left: 1px solid #f0e8f5; background:#fdf8f5;">
+                {% if item.song.youtube_url %}
+                <button onclick="event.stopPropagation(); openYtPlayer({{ item.song.youtube_embed_url|tojson }}, {{ item.song.title|tojson }})"
+                        class="btn btn-xs btn-ghost" style="color:#ff0000;" title="Reproducir">
+                  <i class="fab fa-youtube"></i>
+                </button>
+                {% endif %}
+                <button onclick="event.stopPropagation(); toggleNotes({{ item.id }})"
+                        class="btn btn-xs btn-ghost text-gray-400 hover:text-yellow-500" title="Notas">
+                  <i class="fas fa-sticky-note"></i>
+                </button>
+                <button onclick="event.stopPropagation(); removeItem({{ show.id }}, {{ item.id }})"
+                        class="btn btn-xs btn-ghost text-gray-400 hover:text-red-400" title="Quitar">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+          {% endif %}
+
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const PUBLIC_LINK = "{{ request.host_url }}p/{{ show.public_token }}";
+
+  function toggleMusiciansPopover() {
+    const pop = document.getElementById('musicians-popover');
+    const arrow = document.getElementById('musicians-chip-arrow');
+    if (!pop) return;
+    const isOpen = pop.style.display !== 'none';
+    pop.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+  }
+
+  document.addEventListener('click', function(e) {
+    const wrapper = document.getElementById('musicians-chip-wrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+      const pop = document.getElementById('musicians-popover');
+      const arrow = document.getElementById('musicians-chip-arrow');
+      if (pop) pop.style.display = 'none';
+      if (arrow) arrow.style.transform = '';
+    }
+  });
+
+  function shareWhatsapp() {
+    const text = 'Ver setlist: ' + PUBLIC_LINK;
+    window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+  }
+
+  function copyPublicLink() {
+    navigator.clipboard.writeText(PUBLIC_LINK).then(() => {
+      showMiniToast('Link copiado al portapapeles ✓');
+    }).catch(() => {
+      // Fallback
+      const el = document.getElementById('public-link');
+      if (el) {
+        const range = document.createRange();
+        range.selectNode(el);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        showMiniToast('Link copiado ✓');
+      }
+    });
+  }
+
+  // ── Reproductor YouTube ─────────────────────────────────
+  function openYtPlayer(embedUrl, title) {
+    if (!embedUrl) return;
+    let modal = document.getElementById('yt-player-modal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'yt-player-modal';
+      modal.style = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;padding:1rem;';
+      modal.onclick = function(e) { if(e.target===modal) closeYtPlayer(); };
+      modal.innerHTML = `
+        <div style="background:#000;border-radius:16px;overflow:hidden;width:100%;max-width:700px;box-shadow:0 20px 60px rgba(0,0,0,0.6);">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;">
+            <p id="yt-player-title" style="color:#fff;font-size:0.875rem;font-weight:600;margin:0;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></p>
+            <button onclick="closeYtPlayer()" style="color:#fff;opacity:0.6;background:none;border:none;cursor:pointer;font-size:1.1rem;margin-left:12px;"><i class="fas fa-times"></i></button>
+          </div>
+          <div style="position:relative;padding-bottom:56.25%;">
+            <iframe id="yt-player-iframe" src="" frameborder="0" allowfullscreen allow="autoplay"
+                    style="position:absolute;inset:0;width:100%;height:100%;"></iframe>
+          </div>
+        </div>`;
+      document.body.appendChild(modal);
+    }
+    document.getElementById('yt-player-title').textContent = title || '';
+    document.getElementById('yt-player-iframe').src = embedUrl;
+    modal.style.display = 'flex';
+  }
+
+  function closeYtPlayer() {
+    const modal = document.getElementById('yt-player-modal');
+    if (modal) {
+      document.getElementById('yt-player-iframe').src = '';
+      modal.style.display = 'none';
+    }
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') { closeYtPlayer(); closeLyricsModal(); }
+  });
+
+  var CSRF_B = document.querySelector('meta[name="csrf-token"]').content;
+  const _NOTE_ES_B = { 'C':'Do','D':'Re','E':'Mi','F':'Fa','G':'Sol','A':'La','B':'Si' };
+  const _NOTE_EN_B = { 'Do':'C','Re':'D','Mi':'E','Fa':'F','Sol':'G','La':'A','Si':'B' };
+
+  function escHtmlB(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  function renderLyricsWithChords(text) {
+    if (!text) return '';
+    if (!text.includes('[')) return '<span style="white-space:pre-wrap;">' + escHtmlB(text) + '</span>';
+    return text.split('\n').map(function(line) {
+      if (!line.includes('[')) return '<div class="chord-line"><span class="chord-seg"><span class="chord-name">\u00a0</span><span class="chord-lyric">' + escHtmlB(line || '\u00a0') + '</span></span></div>';
+      var parts = line.split(/(\[[^\]]+\])/), pending = '', html = '<div class="chord-line">';
+      parts.forEach(function(p) {
+        if (/^\[[^\]]+\]$/.test(p)) { pending = p.slice(1,-1); }
+        else { html += '<span class="chord-seg"><span class="chord-name">' + escHtmlB(pending||'\u00a0') + '</span><span class="chord-lyric">' + escHtmlB(p||'\u00a0') + '</span></span>'; pending = ''; }
+      });
+      if (pending) html += '<span class="chord-seg"><span class="chord-name">' + escHtmlB(pending) + '</span><span class="chord-lyric">\u00a0</span></span>';
+      return html + '</div>';
+    }).join('');
+  }
+
+  function chordToSpanishB(c) { return c.replace(/^([A-G])(#|b)?/, function(_,n,a){ return _NOTE_ES_B[n]+(a||''); }); }
+  function convertLyricsB(text, fn) { return text.replace(/\[([^\]]+)\]/g, function(_,c){ return '['+fn(c)+']'; }); }
+
+  function _isChordLineB(line) {
+    var s = line.trim();
+    if (!s) return false;
+    var without = s.replace(/\b(Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?\b/g, '');
+    return !without.trim();
+  }
+
+  function chordsAboveToInline(text) {
+    if (!text) return text;
+    if (/\[(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b]?(?:m|maj|dim|aug|sus)?\]/.test(text)) return text;
+    var lines = text.split('\n'), result = [], i = 0;
+    while (i < lines.length) {
+      if (_isChordLineB(lines[i]) && i + 1 < lines.length && !_isChordLineB(lines[i + 1]) && lines[i + 1].trim()) {
+        var chordLine = lines[i], lyricLine = lines[i + 1];
+        var chordRegex = /\b((?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?)\b/g;
+        var chords = [], m;
+        while ((m = chordRegex.exec(chordLine)) !== null) { chords.push({ pos: m.index, name: m[1] }); }
+        var merged = '', lastPos = 0;
+        chords.forEach(function(c) { var pos = Math.min(c.pos, lyricLine.length); merged += lyricLine.substring(lastPos, pos) + '[' + c.name + ']'; lastPos = pos; });
+        merged += lyricLine.substring(lastPos);
+        result.push(merged);
+        i += 2;
+      } else if (_isChordLineB(lines[i])) {
+        var chordRegex2 = /\b((?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?)\b/g;
+        result.push(lines[i].replace(chordRegex2, '[$1]').trim());
+        i++;
+      } else { result.push(lines[i]); i++; }
+    }
+    return result.join('\n');
+  }
+
+  var _chordsInSpanish = false, _currentLyrics = '', _lyricsExpanded = false;
+  var _currentYtEmbed  = '';
+  var _modalSongId = null, _modalBlob = null, _modalMr = null, _modalChunks = [], _modalTimerInt = null, _modalRecSecs = 0, _modalIsRec = false;
+
+  function toggleChordLang() {
+    _chordsInSpanish = !_chordsInSpanish;
+    var btn = document.getElementById('modal-chord-lang-btn');
+    btn.textContent = _chordsInSpanish ? 'C' : 'Do';
+    btn.style.color = _chordsInSpanish ? '#d97706' : '';
+    var text = _chordsInSpanish ? convertLyricsB(_currentLyrics, chordToSpanishB) : _currentLyrics;
+    document.getElementById('modal-lyrics').innerHTML = renderLyricsWithChords(text);
+  }
+
+  function toggleExpandLyrics() {
+    _lyricsExpanded = !_lyricsExpanded;
+    var box = document.getElementById('lyrics-modal-box');
+    var lyrics = document.getElementById('modal-lyrics');
+    var icon = document.getElementById('modal-expand-btn').querySelector('i');
+    if (_lyricsExpanded) {
+      box.style.maxWidth = '900px'; box.style.maxHeight = '95vh';
+      lyrics.style.columnCount = '2'; lyrics.style.columnGap = '2.5rem';
+      icon.className = 'fas fa-compress text-xs';
+    } else {
+      box.style.maxWidth = ''; box.style.maxHeight = '';
+      lyrics.style.columnCount = ''; lyrics.style.columnGap = '';
+      icon.className = 'fas fa-expand text-xs';
+    }
+  }
+
+  function toggleModalRec() {
+    var panel = document.getElementById('modal-rec-panel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function toggleModalRecording() {
+    if (_modalIsRec) {
+      if (_modalMr && _modalMr.state !== 'inactive') _modalMr.stop();
+      clearInterval(_modalTimerInt);
+    } else {
+      navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+        _modalChunks = []; _modalMr = new MediaRecorder(stream);
+        _modalMr.ondataavailable = function(e) { if (e.data.size > 0) _modalChunks.push(e.data); };
+        _modalMr.onstop = function() {
+          stream.getTracks().forEach(function(t) { t.stop(); });
+          var mime = _modalMr.mimeType || 'audio/webm';
+          _modalBlob = new Blob(_modalChunks, { type: mime });
+          document.getElementById('modal-rec-new-audio').src = URL.createObjectURL(_modalBlob);
+          document.getElementById('modal-rec-new').style.display = 'block';
+          document.getElementById('modal-rec-hint').textContent = 'Escuchá y guardá si está bien.';
+          document.getElementById('modal-rec-timer').style.display = 'none';
+          _modalIsRec = false;
+          document.getElementById('modal-rec-toggle').style.background = '#ef4444';
+          document.getElementById('modal-rec-icon').className = 'fas fa-microphone';
+        };
+        _modalMr.start(100); _modalIsRec = true; _modalRecSecs = 0;
+        document.getElementById('modal-rec-timer').textContent = '0:00';
+        document.getElementById('modal-rec-timer').style.display = 'inline';
+        document.getElementById('modal-rec-hint').textContent = 'Grabando... tocá para detener.';
+        document.getElementById('modal-rec-toggle').style.background = '#7f1d1d';
+        document.getElementById('modal-rec-icon').className = 'fas fa-stop';
+        _modalTimerInt = setInterval(function() {
+          _modalRecSecs++;
+          var m = Math.floor(_modalRecSecs/60), s = _modalRecSecs%60;
+          document.getElementById('modal-rec-timer').textContent = m+':'+(s<10?'0':'')+s;
+        }, 1000);
+      }).catch(function() { alert('No se pudo acceder al micrófono.'); });
+    }
+  }
+
+  function saveModalRecording() {
+    if (!_modalBlob || !_modalSongId) return;
+    var fd = new FormData();
+    fd.append('recording', _modalBlob, 'rec.webm');
+    fetch('/songs/' + _modalSongId + '/save-recording', {
+      method: 'POST', headers: { 'X-CSRFToken': CSRF_B }, body: fd
+    }).then(function(r){ return r.json(); }).then(function(d) {
+      if (d.ok) {
+        document.getElementById('modal-rec-existing-audio').src = d.url;
+        document.getElementById('modal-rec-existing').style.display = 'block';
+        document.getElementById('modal-rec-new').style.display = 'none';
+        document.getElementById('modal-rec-hint').textContent = 'Grabación guardada.';
+        _modalBlob = null;
+      }
+    });
+  }
+
+  function discardModalRec() {
+    _modalBlob = null;
+    document.getElementById('modal-rec-new-audio').src = '';
+    document.getElementById('modal-rec-new').style.display = 'none';
+    document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+  }
+
+  function deleteModalRecording() {
+    if (!_modalSongId || !confirm('¿Eliminar la grabación?')) return;
+    fetch('/songs/' + _modalSongId + '/delete-recording', {
+      method: 'POST', headers: { 'X-CSRFToken': CSRF_B }
+    }).then(function(r){ return r.json(); }).then(function(d) {
+      if (d.ok) {
+        document.getElementById('modal-rec-existing-audio').src = '';
+        document.getElementById('modal-rec-existing').style.display = 'none';
+        document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+      }
+    });
+  }
+
+  function loadYtAudio() {
+    if (!_currentYtEmbed) return;
+    var sep = _currentYtEmbed.includes('?') ? '&' : '?';
+    document.getElementById('modal-yt-iframe').src = _currentYtEmbed + sep + 'autoplay=1&controls=1&modestbranding=1&rel=0';
+    document.getElementById('modal-yt-player').style.display = 'block';
+    document.getElementById('modal-yt-play-btn').style.display = 'none';
+  }
+
+  function openLyricsModal(id) {
+    const s = SONGS_DATA[id];
+    if (!s) return;
+
+    _modalSongId = id; _modalBlob = null;
+    _chordsInSpanish = false; _currentLyrics = chordsAboveToInline(s.lyrics || ''); _lyricsExpanded = false;
+    _currentYtEmbed = s.youtubeEmbed || '';
+
+    document.getElementById('modal-title').textContent  = s.title;
+    document.getElementById('modal-artist').textContent = s.artist || '—';
+
+    var chordBtn = document.getElementById('modal-chord-lang-btn');
+    chordBtn.textContent = 'Do'; chordBtn.style.color = '';
+    var expandIcon = document.getElementById('modal-expand-btn').querySelector('i');
+    expandIcon.className = 'fas fa-expand text-xs';
+    var box = document.getElementById('lyrics-modal-box');
+    box.style.maxWidth = ''; box.style.maxHeight = '';
+
+    var metaEl = document.getElementById('modal-meta'), metaHtml = '';
+    if (s.genre)    metaHtml += `<span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">${s.genre}</span>`;
+    if (s.key)      metaHtml += `<span class="text-xs font-bold" style="color:#d97706;"><i class="fas fa-key mr-1"></i>${s.key}</span>`;
+    if (s.bpm)      metaHtml += `<span class="text-xs text-gray-500">${s.bpm} BPM</span>`;
+    if (s.duration) metaHtml += `<span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${s.duration}</span>`;
+    metaEl.innerHTML = metaHtml;
+
+    var lyricsEl = document.getElementById('modal-lyrics'), noLyricsEl = document.getElementById('modal-no-lyrics');
+    if (s.lyrics && s.lyrics.trim()) {
+      lyricsEl.innerHTML = renderLyricsWithChords(_currentLyrics);
+      lyricsEl.style.columnCount = ''; lyricsEl.style.columnGap = '';
+      lyricsEl.style.display = 'block'; noLyricsEl.style.display = 'none';
+    } else {
+      lyricsEl.style.display = 'none'; noLyricsEl.style.display = 'block';
+      document.getElementById('modal-edit-link').href = s.editUrl;
+    }
+
+    var notesEl = document.getElementById('modal-notes');
+    if (s.notes && s.notes.trim()) {
+      notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${s.notes}</p>`;
+      notesEl.style.display = 'block';
+    } else { notesEl.style.display = 'none'; }
+
+    var printBtn = document.getElementById('modal-print-btn');
+    if (printBtn && s.printUrl) printBtn.href = s.printUrl;
+
+    // Grabación
+    document.getElementById('modal-rec-panel').style.display = 'none';
+    document.getElementById('modal-rec-new').style.display   = 'none';
+    document.getElementById('modal-rec-hint').textContent    = 'Toca para grabar tu referencia.';
+    document.getElementById('modal-rec-timer').style.display = 'none';
+    document.getElementById('modal-rec-toggle').style.background = '#ef4444';
+    document.getElementById('modal-rec-icon').className = 'fas fa-microphone';
+    if (s.recordingUrl) {
+      document.getElementById('modal-rec-existing-audio').src = s.recordingUrl;
+      document.getElementById('modal-rec-existing').style.display = 'block';
+    } else {
+      document.getElementById('modal-rec-existing-audio').src = '';
+      document.getElementById('modal-rec-existing').style.display = 'none';
+    }
+
+    // YouTube
+    document.getElementById('modal-yt-iframe').src = '';
+    document.getElementById('modal-yt-player').style.display = 'none';
+    document.getElementById('modal-yt-play-btn').style.display = 'flex';
+    if (s.youtubeEmbed) {
+      document.getElementById('modal-yt-audio').style.display = 'block';
+    } else {
+      document.getElementById('modal-yt-audio').style.display = 'none';
+    }
+
+    document.getElementById('lyrics-modal').style.display = 'flex';
+  }
+
+  function closeLyricsModal() {
+    document.getElementById('lyrics-modal').style.display = 'none';
+    if (_modalIsRec && _modalMr && _modalMr.state !== 'inactive') _modalMr.stop();
+    clearInterval(_modalTimerInt); _modalIsRec = false;
+    document.getElementById('modal-yt-iframe').src = '';
+    document.getElementById('modal-yt-player').style.display = 'none';
+    document.getElementById('modal-yt-play-btn').style.display = 'flex';
+  }
+
+  // Override toggleNotes for server-rendered items
+  function toggleNotes(itemId) {
+    // Try the Alpine approach first, fallback to simple section
+    const section = document.getElementById(`notes-section-${itemId}`);
+    if (section) {
+      if (section.style.display === 'none') {
+        section.style.display = 'block';
+        const ta = document.getElementById(`notes-${itemId}`);
+        if (ta) ta.focus();
+      } else {
+        section.style.display = 'none';
+      }
+    }
+  }
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  window.SHOW_ID = {{ show.id }};
+  document.addEventListener('DOMContentLoaded', function() {
+    initSortable({{ show.id }});
+    initCatalog({{ show.id }});
+  });
+</script>
+{% endblock %}

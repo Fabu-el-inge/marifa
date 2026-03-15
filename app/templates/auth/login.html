@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MariFá — Iniciar Sesión</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marifa.css') }}" />
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js"></script>
+</head>
+<body data-theme="light" style="min-height: 100vh; background: linear-gradient(135deg, #fdf8f5 0%, #fce7f3 50%, #ede9fe 100%);">
+
+<!-- Notas decorativas de fondo -->
+<div class="fixed inset-0 overflow-hidden pointer-events-none select-none">
+  <span style="position:absolute; top:8%; left:8%; font-size:5rem; opacity:0.06; color:#f43f5e; transform:rotate(-20deg); font-family:'Playfair Display',serif;">♪</span>
+  <span style="position:absolute; top:15%; right:12%; font-size:3.5rem; opacity:0.06; color:#7c3aed; transform:rotate(12deg); font-family:'Playfair Display',serif;">♫</span>
+  <span style="position:absolute; bottom:18%; left:12%; font-size:6rem; opacity:0.05; color:#f59e0b; transform:rotate(8deg); font-family:'Playfair Display',serif;">♩</span>
+  <span style="position:absolute; bottom:12%; right:8%; font-size:4rem; opacity:0.06; color:#f43f5e; transform:rotate(-10deg); font-family:'Playfair Display',serif;">𝄞</span>
+  <span style="position:absolute; top:50%; left:4%; font-size:2.5rem; opacity:0.04; color:#7c3aed; transform:rotate(5deg); font-family:'Playfair Display',serif;">♬</span>
+
+  <!-- Círculos de luz -->
+  <div style="position:absolute; top:-120px; right:-120px; width:500px; height:500px;
+              background: radial-gradient(circle, rgba(244,63,94,0.08) 0%, transparent 70%); border-radius:50%;"></div>
+  <div style="position:absolute; bottom:-120px; left:-120px; width:500px; height:500px;
+              background: radial-gradient(circle, rgba(124,58,237,0.07) 0%, transparent 70%); border-radius:50%;"></div>
+</div>
+
+<!-- CARD LOGIN -->
+<div class="relative z-10 min-h-screen flex items-center justify-center px-4">
+  <div class="w-full max-w-md">
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="mb-4 space-y-2">
+        {% for category, message in messages %}
+        <div class="flash-{{ category }} flex items-center gap-3 rounded-xl py-3 px-4 shadow-sm text-sm">
+          {{ message }}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- Card principal -->
+    <div style="background: rgba(255,255,255,0.85); backdrop-filter: blur(20px); border: 1px solid rgba(244,63,94,0.15);
+                border-radius: 28px; box-shadow: 0 20px 60px rgba(244,63,94,0.12), 0 4px 16px rgba(0,0,0,0.06);"
+         class="p-10">
+
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div style="font-size: 4rem; line-height: 1; margin-bottom: 4px;"
+             class="marifa-logo-icon">♪</div>
+        <h1 class="marifa-logo" style="font-size: 3.5rem; line-height: 1.1;">MariFá</h1>
+        <p style="color: #9ca3af; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 8px;">
+          Gestión de Setlists
+        </p>
+      </div>
+
+      <!-- Separador decorativo -->
+      <div class="flex items-center gap-3 mb-8">
+        <div style="flex:1; height:1px; background: linear-gradient(90deg, transparent, rgba(244,63,94,0.3));"></div>
+        <span style="color: rgba(244,63,94,0.5); font-size: 1rem;">♪</span>
+        <div style="flex:1; height:1px; background: linear-gradient(90deg, rgba(244,63,94,0.3), transparent);"></div>
+      </div>
+
+      <!-- Form -->
+      <form method="POST" action="{{ url_for('auth.login') }}">
+        {{ form.hidden_tag() }}
+
+        <div class="space-y-4">
+          <!-- Usuario -->
+          <div>
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#6b7280; margin-bottom:6px; letter-spacing:0.04em;">
+              <i class="fas fa-user mr-2" style="color:#f43f5e;"></i>USUARIO
+            </label>
+            <input type="text" name="username"
+                   value="{{ form.username.data or '' }}"
+                   class="marifa-input w-full px-4 py-3"
+                   placeholder="Tu usuario"
+                   autocomplete="username" autofocus />
+            {% if form.username.errors %}
+              <p style="color:#dc2626; font-size:0.75rem; margin-top:4px;">{{ form.username.errors[0] }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Contraseña -->
+          <div>
+            <label style="display:block; font-size:0.8rem; font-weight:600; color:#6b7280; margin-bottom:6px; letter-spacing:0.04em;">
+              <i class="fas fa-lock mr-2" style="color:#f43f5e;"></i>CONTRASEÑA
+            </label>
+            <input type="password" name="password"
+                   class="marifa-input w-full px-4 py-3"
+                   placeholder="••••••••"
+                   autocomplete="current-password" />
+            {% if form.password.errors %}
+              <p style="color:#dc2626; font-size:0.75rem; margin-top:4px;">{{ form.password.errors[0] }}</p>
+            {% endif %}
+          </div>
+
+          <!-- Recordarme -->
+          <div class="flex items-center gap-2 pt-1">
+            <input type="checkbox" name="remember_me" id="remember_me"
+                   class="checkbox checkbox-sm" style="border-color: #f43f5e;" />
+            <label for="remember_me" style="font-size:0.85rem; color:#6b7280; cursor:pointer;">
+              Recordarme
+            </label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-marifa w-full mt-6 py-3 text-base">
+          <i class="fas fa-sign-in-alt mr-2"></i>
+          Ingresar
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <p class="text-center mt-6" style="color:#d1d5db; font-size:0.78rem; letter-spacing:0.05em;">
+        MariFá — Gestión musical
+      </p>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

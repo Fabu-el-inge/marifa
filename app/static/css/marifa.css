@@ -1,0 +1,547 @@
+/* ===== MARIFÁ — Rosa & Dorado Elegante ===== */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --bg:        #fdf8f5;
+  --bg-soft:   #f9f3ee;
+  --sidebar:   #1e3d2f;
+  --sidebar-2: #14291f;
+  --card:      #ffffff;
+  --border:    #ede6f5;
+  --rose:      #f43f5e;
+  --rose-soft: #fff0f3;
+  --violet:    #7c3aed;
+  --violet-soft: #f5f0ff;
+  --gold:      #f59e0b;
+  --gold-soft: #fffbeb;
+  --text:      #1e1b2e;
+  --muted:     #4b5563;
+  --muted-2:   #6b7280;
+  --success:   #10b981;
+  --danger:    #ef4444;
+}
+
+/* ===== BASE ===== */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .font-serif {
+  font-family: 'Playfair Display', serif;
+}
+
+/* ===== LOGO ===== */
+.marifa-logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-style: italic;
+  background: linear-gradient(135deg, #f43f5e, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.02em;
+}
+
+.marifa-logo-icon {
+  background: linear-gradient(135deg, #f43f5e, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 2px 8px rgba(244, 63, 94, 0.4));
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  background: linear-gradient(180deg, #1e3d2f 0%, #14291f 60%, #0e1f17 100%);
+  border-right: none;
+  box-shadow: 4px 0 24px rgba(0,0,0,0.15);
+  position: fixed;
+  overflow: hidden;
+}
+
+/* Decoración suave en sidebar */
+.sidebar::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(244,63,94,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  bottom: -80px;
+  left: -80px;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, rgba(245,158,11,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Waveform decorativo */
+.sidebar-waveform {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  opacity: 0.06;
+  pointer-events: none;
+}
+
+/* ===== NAV LINKS (sidebar) ===== */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  color: rgba(255,255,255,0.55);
+  transition: all 0.2s ease;
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.nav-link:hover {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.9);
+}
+
+.nav-link.active {
+  background: linear-gradient(135deg, rgba(244,63,94,0.25), rgba(245,158,11,0.15));
+  color: #fff;
+  border: 1px solid rgba(244,63,94,0.3);
+}
+
+.nav-link.active i {
+  color: #f9a8b8;
+}
+
+/* ===== TOPBAR ===== */
+.topbar {
+  background: rgba(253,248,245,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ===== CARDS ===== */
+.marifa-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(124,58,237,0.06);
+  transition: all 0.3s ease;
+}
+
+.marifa-card:hover {
+  box-shadow: 0 8px 32px rgba(244,63,94,0.10);
+  border-color: #e9d5f5;
+}
+
+/* ===== SHOW CARDS ===== */
+.show-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  transition: all 0.3s ease;
+}
+
+.show-card:hover {
+  box-shadow: 0 8px 32px rgba(244,63,94,0.12);
+  border-color: #f9a8b8;
+  transform: translateY(-2px);
+}
+
+.show-card.today {
+  border-color: var(--gold);
+  box-shadow: 0 4px 20px rgba(245,158,11,0.2);
+  background: linear-gradient(135deg, #fff 0%, #fffbeb 100%);
+}
+
+/* ===== CATALOG SONGS ===== */
+.catalog-song {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: all 0.2s;
+}
+
+.catalog-song:hover {
+  background: var(--rose-soft);
+  border-color: #fca5b4;
+  box-shadow: 0 4px 16px rgba(244,63,94,0.08);
+}
+
+/* ===== SETLIST ITEMS ===== */
+.setlist-item {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: all 0.2s ease;
+  cursor: grab;
+}
+
+.setlist-item:hover {
+  background: #fff;
+  border-color: #ddd0f5;
+  box-shadow: 0 4px 16px rgba(124,58,237,0.08);
+  transform: translateX(2px);
+}
+
+.setlist-item.sortable-ghost {
+  opacity: 0.35;
+  background: var(--violet-soft);
+}
+
+.setlist-item.sortable-drag {
+  background: #fff;
+  border-color: var(--rose);
+  box-shadow: 0 12px 40px rgba(244,63,94,0.2);
+  cursor: grabbing;
+  transform: rotate(1deg) scale(1.01);
+}
+
+/* Drag & drop catálogo */
+.catalog-song.sortable-ghost {
+  opacity: 0.3;
+  background: var(--violet-soft);
+}
+.catalog-song.sortable-chosen {
+  box-shadow: 0 8px 30px rgba(124,58,237,0.18);
+  transform: scale(1.02);
+  z-index: 10;
+}
+.catalog-song.sortable-drag {
+  background: #fff;
+  box-shadow: 0 12px 40px rgba(244,63,94,0.2);
+  cursor: grabbing;
+  transform: rotate(0.5deg) scale(1.02);
+}
+
+.setlist-item.is-break {
+  background: var(--gold-soft);
+  border: 1px dashed #fcd34d;
+  border-radius: 14px;
+}
+
+/* ===== DRAG HANDLE ===== */
+.drag-handle {
+  cursor: grab;
+  color: var(--muted-2);
+  transition: color 0.2s;
+  padding: 4px;
+}
+
+.drag-handle:hover {
+  color: var(--rose);
+}
+
+/* ===== NÚMEROS DE POSICIÓN ===== */
+.setlist-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.2rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f43f5e, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.3;
+  line-height: 1;
+  min-width: 46px;
+  text-align: center;
+  transition: opacity 0.2s;
+}
+
+.setlist-item:hover .setlist-number {
+  opacity: 0.7;
+}
+
+/* ===== GENRE BADGES ===== */
+.genre-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 2px 10px;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* ===== BOTONES ===== */
+.btn-marifa {
+  background: linear-gradient(135deg, #f43f5e, #e11d48);
+  color: white !important;
+  border: none;
+  transition: all 0.2s;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.btn-marifa:hover {
+  background: linear-gradient(135deg, #e11d48, #be123c);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(244,63,94,0.35);
+  color: white !important;
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #1e1b2e !important;
+  border: none;
+  font-weight: 700;
+}
+
+.btn-gold:hover {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(245,158,11,0.35);
+  color: #1e1b2e !important;
+}
+
+/* ===== INPUTS ===== */
+.marifa-input {
+  background: var(--bg-soft);
+  border: 1.5px solid var(--border);
+  color: var(--text);
+  border-radius: 10px;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.marifa-input:focus {
+  border-color: var(--rose);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(244,63,94,0.1);
+  background: #fff;
+}
+
+.marifa-input::placeholder {
+  color: var(--muted-2);
+}
+
+/* SELECT */
+select.marifa-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+/* ===== PENTAGRAMA DECORATIVO ===== */
+.staff-divider {
+  position: relative;
+  height: 20px;
+  overflow: hidden;
+  opacity: 0.2;
+  margin: 8px 0;
+}
+
+.staff-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent, transparent 3px,
+    rgba(244, 63, 94, 0.6) 3px, rgba(244, 63, 94, 0.6) 4px
+  );
+}
+
+/* ===== ANIMACIÓN NOTA MUSICAL ===== */
+@keyframes floatNote {
+  0%   { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
+  100% { opacity: 0; transform: translateY(-90px) scale(1.6) rotate(15deg); }
+}
+
+.floating-note {
+  position: fixed;
+  font-size: 2rem;
+  pointer-events: none;
+  animation: floatNote 1.1s ease-out forwards;
+  z-index: 9999;
+  background: linear-gradient(135deg, #f43f5e, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(244,63,94,0.5));
+}
+
+/* ===== BUILDER GRID ===== */
+.builder-bg {
+  background-image:
+    linear-gradient(rgba(244,63,94,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(244,63,94,0.025) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ===== DURACIÓN ===== */
+.duration-counter {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ===== STATUS BADGES ===== */
+.status-today {
+  background: linear-gradient(135deg, #f59e0b, #f43f5e);
+  color: white;
+  animation: pulse 2s infinite;
+}
+
+.status-upcoming {
+  background: var(--rose-soft);
+  color: #e11d48;
+  border: 1px solid #fca5b4;
+}
+
+.status-past {
+  background: #f9fafb;
+  color: var(--muted);
+  border: 1px solid #e5e7eb;
+}
+
+/* ===== FLASH MESSAGES ===== */
+.flash-success { border-left: 4px solid var(--success); background: #f0fdf4 !important; color: #166534; }
+.flash-error   { border-left: 4px solid var(--danger);  background: #fff1f2 !important; color: #9f1239; }
+.flash-warning { border-left: 4px solid var(--gold);    background: var(--gold-soft) !important; color: #92400e; }
+.flash-info    { border-left: 4px solid #3b82f6;        background: #eff6ff !important; color: #1e40af; }
+
+/* ===== NOTES ===== */
+.notes-area {
+  background: var(--gold-soft);
+  border: 1.5px solid #fde68a;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.85rem;
+  font-style: italic;
+  font-family: 'Inter', sans-serif;
+}
+
+.notes-area:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(245,158,11,0.1);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--muted);
+}
+
+.empty-state-icon {
+  font-size: 3.5rem;
+  opacity: 0.35;
+  margin-bottom: 16px;
+  display: block;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar       { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: #ddd0f5; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #c4b0e8; }
+
+/* ===== ANIMACIONES ===== */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in { animation: slideIn 0.3s ease-out; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.35s ease-out; }
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(244,63,94,0.2);
+  border-top-color: var(--rose);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== PUBLIC VIEW ===== */
+.public-song-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 2.8rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #f43f5e, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  opacity: 0.35;
+  line-height: 1;
+}
+
+.public-key-badge {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 3px 12px;
+  border-radius: 20px;
+  letter-spacing: 0.05em;
+}
+
+/* ===== DURATION WARNING ===== */
+@keyframes pulseRed {
+  0%, 100% { color: var(--gold); }
+  50%       { color: var(--danger); }
+}
+.duration-warning { animation: pulseRed 1.5s ease-in-out infinite; }
+
+/* ===== ACORDES ===== */
+.chord-line {
+  display: block;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.chord-seg {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 1px;
+}
+.chord-name {
+  display: block;
+  font-weight: 700;
+  color: #e11d48;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  font-family: 'Inter', sans-serif;
+  white-space: pre;
+}
+.chord-lyric {
+  display: block;
+  font-family: monospace;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  white-space: pre;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  .no-print { display: none !important; }
+  body { background: white; }
+}

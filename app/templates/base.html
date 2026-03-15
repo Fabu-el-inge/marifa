@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <title>{% block title %}MariFá{% endblock %} — Gestión de Setlists</title>
+
+  <!-- Tailwind CSS + DaisyUI (theme light para base) -->
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/marifa.css') }}" />
+
+  <!-- Alpine.js -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js"></script>
+
+  <style>
+    /* Override DaisyUI para tema claro */
+    [data-theme] { --rounded-box: 1rem; }
+    .btn { border-radius: 10px; font-family: 'Inter', sans-serif; }
+    .badge { border-radius: 20px; }
+    input, select, textarea { font-family: 'Inter', sans-serif; }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body data-theme="light" style="background-color: #fdf8f5; min-height: 100vh;">
+
+{% if current_user.is_authenticated %}
+<!-- ===== LAYOUT CON SIDEBAR ===== -->
+<div class="flex min-h-screen">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar w-52 flex-shrink-0 flex flex-col fixed left-0 top-0 z-30"
+         style="height: 100vh;">
+
+    <!-- Waveform decorativo -->
+    <svg class="sidebar-waveform" viewBox="0 0 256 100" preserveAspectRatio="none" fill="none">
+      <path d="M0 50 Q8 15 16 50 Q24 85 32 50 Q40 15 48 50 Q56 85 64 50 Q72 15 80 50 Q88 85 96 50 Q104 15 112 50 Q120 85 128 50 Q136 15 144 50 Q152 85 160 50 Q168 15 176 50 Q184 85 192 50 Q200 15 208 50 Q216 85 224 50 Q232 15 240 50 Q248 85 256 50"
+            stroke="white" stroke-width="1.5" fill="none"/>
+    </svg>
+
+    <!-- TOP: Logo (fijo) -->
+    <div class="flex-shrink-0 pt-4 pb-2 px-4">
+      <div class="mb-3 px-2">
+        <a href="{{ url_for('songs.index') }}" class="flex items-center gap-2">
+          <span class="marifa-logo-icon text-3xl leading-none">♪</span>
+          <span class="marifa-logo text-3xl" style="padding-right: 6px;">MariFá</span>
+        </a>
+        <p style="color: rgba(255,255,255,0.35); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase;"
+           class="mt-1 pl-1">Gestión de Setlists</p>
+      </div>
+      <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);"></div>
+    </div>
+
+    <!-- MIDDLE: Nav (scrollable si hay poco espacio) -->
+    <div class="flex-1 overflow-y-auto px-4 pb-2" style="scrollbar-width:none; min-height:0;">
+
+      <!-- Sección Canciones -->
+      <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 6px;">
+        Catálogo
+      </p>
+      <nav class="space-y-0.5 mb-2">
+        <a href="{{ url_for('songs.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('songs') and request.endpoint != 'songs.new' %}active{% endif %}">
+          <i class="fas fa-music w-4 text-sm"></i>
+          <span>Todas las Canciones</span>
+        </a>
+        <a href="{{ url_for('songs.new') }}"
+           class="nav-link {% if request.endpoint == 'songs.new' %}active{% endif %}">
+          <i class="fas fa-plus-circle w-4 text-sm"></i>
+          <span>Nueva Canción</span>
+        </a>
+      </nav>
+
+      <!-- Sección Shows -->
+      <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
+        Shows
+      </p>
+      <nav class="space-y-0.5 mb-2">
+        <a href="{{ url_for('shows.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('shows') and request.endpoint != 'shows.new' %}active{% endif %}">
+          <i class="fas fa-calendar-alt w-4 text-sm"></i>
+          <span>Mis Shows</span>
+        </a>
+        <a href="{{ url_for('shows.new') }}"
+           class="nav-link {% if request.endpoint == 'shows.new' %}active{% endif %}">
+          <i class="fas fa-calendar-plus w-4 text-sm"></i>
+          <span>Nuevo Show</span>
+        </a>
+      </nav>
+
+      <!-- Sección Bandas -->
+      <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
+        Bandas
+      </p>
+      <nav class="space-y-0.5 mb-2">
+        <a href="{{ url_for('bands.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('bands') and request.endpoint != 'bands.new' %}active{% endif %}">
+          <i class="fas fa-guitar w-4 text-sm"></i>
+          <span>Mis Bandas</span>
+        </a>
+        <a href="{{ url_for('bands.new') }}"
+           class="nav-link {% if request.endpoint == 'bands.new' %}active{% endif %}">
+          <i class="fas fa-plus-circle w-4 text-sm"></i>
+          <span>Nueva Banda</span>
+        </a>
+      </nav>
+
+      <!-- Sección Músicos -->
+      <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
+        Músicos
+      </p>
+      <nav class="space-y-0.5">
+        <a href="{{ url_for('musicians.index') }}"
+           class="nav-link {% if request.endpoint and request.endpoint.startswith('musicians') and request.endpoint != 'musicians.new' %}active{% endif %}">
+          <i class="fas fa-users w-4 text-sm"></i>
+          <span>Mis Músicos</span>
+        </a>
+        <a href="{{ url_for('musicians.new') }}"
+           class="nav-link {% if request.endpoint == 'musicians.new' %}active{% endif %}">
+          <i class="fas fa-user-plus w-4 text-sm"></i>
+          <span>Nuevo Músico</span>
+        </a>
+      </nav>
+
+    </div>
+
+    <!-- BOTTOM: Usuario -->
+    <div class="flex-shrink-0 px-3 py-2"
+         style="border-top: 1px solid rgba(255,255,255,0.08);">
+      <div class="flex items-center gap-2 justify-between">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+               style="background: linear-gradient(135deg, #f43f5e, #f59e0b);">
+            {{ current_user.username[0].upper() }}
+          </div>
+          <p style="color: rgba(255,255,255,0.85); font-size: 0.8rem; font-weight: 600;" class="truncate">
+            {{ current_user.username }}
+          </p>
+        </div>
+        <a href="{{ url_for('auth.logout') }}"
+           class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+           style="color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);"
+           title="Cerrar sesión">
+          <i class="fas fa-sign-out-alt text-sm"></i>
+        </a>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="flex-1 ml-52 flex flex-col min-h-screen">
+
+    <!-- TOPBAR -->
+    <header class="topbar sticky top-0 z-20 px-6 py-3 flex items-center justify-between">
+      <div>
+        <h1 class="text-lg font-bold" style="font-family: 'Playfair Display', serif; color: #1e1b2e;">
+          {% block page_title %}{% endblock %}
+        </h1>
+        <p class="text-xs" style="color: #9ca3af;">{% block page_subtitle %}{% endblock %}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        {% block topbar_actions %}{% endblock %}
+      </div>
+    </header>
+
+    <!-- FLASH MESSAGES -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="px-6 pt-4 space-y-2">
+        {% for category, message in messages %}
+        <div class="flash-{{ category }} flex items-center gap-3 rounded-xl py-3 px-4 shadow-sm"
+             x-data="{ show: true }" x-show="show"
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+          {% if category == 'success' %}
+            <i class="fas fa-check-circle" style="color: #059669;"></i>
+          {% elif category == 'error' %}
+            <i class="fas fa-exclamation-circle" style="color: #dc2626;"></i>
+          {% elif category == 'warning' %}
+            <i class="fas fa-exclamation-triangle" style="color: #d97706;"></i>
+          {% else %}
+            <i class="fas fa-info-circle" style="color: #2563eb;"></i>
+          {% endif %}
+          <span class="text-sm flex-1">{{ message }}</span>
+          <button @click="show = false" class="hover:opacity-70 transition-opacity ml-2">
+            <i class="fas fa-times text-xs"></i>
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endwith %}
+
+    <!-- PAGE CONTENT -->
+    <main class="flex-1 p-6">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div>
+</div>
+
+{% else %}
+<!-- Sin sidebar (auth pages) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="fixed top-4 right-4 z-50 space-y-2 max-w-sm">
+    {% for category, message in messages %}
+    <div class="flash-{{ category }} flex items-center gap-3 rounded-xl py-3 px-4 shadow-lg"
+         x-data="{ show: true }" x-show="show">
+      <span class="text-sm flex-1">{{ message }}</span>
+      <button @click="show = false"><i class="fas fa-times text-xs opacity-60"></i></button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+{% block auth_content %}{% endblock %}
+{% endif %}
+
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>
+<script src="{{ url_for('static', filename='js/sortable-init.js') }}"></script>
+<script src="{{ url_for('static', filename='js/catalog.js') }}"></script>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

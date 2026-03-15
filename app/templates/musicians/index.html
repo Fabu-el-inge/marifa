@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Mis Músicos{% endblock %}
+{% block page_title %}Mis Músicos{% endblock %}
+{% block page_subtitle %}{{ total }} músico{{ 's' if total != 1 }} en tu directorio{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('musicians.new') }}" class="btn btn-marifa btn-sm gap-2">
+  <i class="fas fa-plus"></i> Nuevo Músico
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+  {% if not grouped %}
+  <div class="empty-state marifa-card py-16">
+    <div class="empty-state-icon">🎸</div>
+    <h3 class="font-serif text-xl mb-2" style="color:#4b5563;">Tu lista de músicos está vacía</h3>
+    <p class="text-sm mb-5" style="color:#6b7280;">Agregá los músicos con los que trabajás para poder asignarlos a tus shows.</p>
+    <a href="{{ url_for('musicians.new') }}" class="btn btn-marifa gap-2">
+      <i class="fas fa-plus"></i> Agregar primer músico
+    </a>
+  </div>
+  {% else %}
+
+  <div class="space-y-8">
+    {% for instrument, musicians in grouped.items() %}
+    <section>
+      <!-- Header del grupo -->
+      <div class="flex items-center gap-3 mb-4">
+        <span style="font-size:1.6rem;">{{ musicians[0].instrument_emoji }}</span>
+        <h2 class="font-serif text-xl font-bold" style="color:#1e1b2e;">{{ instrument }}</h2>
+        <span class="badge badge-sm" style="background:#fce7f3; color:#be185d; border:1px solid #fbcfe8;">
+          {{ musicians|length }}
+        </span>
+        <div style="flex:1; height:1px; background:linear-gradient(90deg,#f3e8ff,transparent);"></div>
+        <a href="{{ url_for('musicians.new', instrument=instrument) }}"
+           class="btn btn-xs btn-ghost gap-1" style="color:#7c3aed;">
+          <i class="fas fa-plus text-xs"></i> Agregar {{ instrument }}
+        </a>
+      </div>
+
+      <!-- Grilla de músicos -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+        {% for m in musicians %}
+        <div class="marifa-card p-4 fade-in">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex-1 min-w-0">
+              <!-- Nombre -->
+              <p class="font-serif font-bold text-base leading-tight" style="color:#1e1b2e;">{{ m.name }}</p>
+              <!-- Instrumento -->
+              <span class="badge badge-sm {{ m.instrument_badge }} mt-1" style="font-size:0.7rem;">
+                {{ m.instrument_emoji }} {{ m.instrument }}
+              </span>
+              <!-- Contacto -->
+              {% if m.phone %}
+              <div class="flex items-center gap-2 mt-2">
+                <i class="fas fa-phone text-xs" style="color:#f43f5e;"></i>
+                <span class="text-sm" style="color:#4b5563;">{{ m.phone }}</span>
+                {% if m.whatsapp_link %}
+                <a href="{{ m.whatsapp_link }}" target="_blank"
+                   class="btn btn-xs gap-1" style="background:#25D366;color:white;border:none;padding:2px 8px;">
+                  <i class="fab fa-whatsapp text-xs"></i>
+                </a>
+                {% endif %}
+              </div>
+              {% endif %}
+              {% if m.email %}
+              <div class="flex items-center gap-2 mt-1">
+                <i class="fas fa-envelope text-xs" style="color:#f43f5e;"></i>
+                <span class="text-xs truncate" style="color:#4b5563;">{{ m.email }}</span>
+              </div>
+              {% endif %}
+              {% if m.notes %}
+              <p class="text-xs mt-2 italic" style="color:#6b7280;">{{ m.notes }}</p>
+              {% endif %}
+            </div>
+            <!-- Acciones -->
+            <div class="flex flex-col gap-1">
+              <a href="{{ url_for('musicians.edit', musician_id=m.id) }}"
+                 class="btn btn-xs btn-ghost" style="color:#6b7280;" title="Editar">
+                <i class="fas fa-edit"></i>
+              </a>
+              <form method="POST" action="{{ url_for('musicians.delete', musician_id=m.id) }}"
+                    onsubmit="return confirm('¿Eliminar a {{ m.name }}?')">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button type="submit" class="btn btn-xs btn-ghost" style="color:#d1d5db;" title="Eliminar">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </section>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

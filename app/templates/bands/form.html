@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}{% if band %}Editar Banda{% else %}Nueva Banda{% endif %}{% endblock %}
+{% block page_title %}{% if band %}Editar Banda{% else %}Nueva Banda{% endif %}{% endblock %}
+{% block page_subtitle %}{% if band %}{{ band.name }}{% else %}Crear banda prearmada{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('bands.index') }}" class="btn btn-ghost btn-sm gap-2 text-gray-700">
+  <i class="fas fa-arrow-left"></i> Mis Bandas
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+  <div class="marifa-card p-8">
+    <div class="mb-6">
+      <h2 class="font-serif text-2xl text-gray-900 mb-1">
+        {% if band %}Editar Banda{% else %}Nueva Banda Prearmada{% endif %}
+      </h2>
+      <div class="staff-divider"></div>
+    </div>
+
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="space-y-5">
+
+        <!-- Nombre -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-guitar mr-2 text-violet-600"></i>Nombre de la banda *
+            </span>
+          </label>
+          <input type="text" name="name"
+                 value="{{ form.name.data or '' }}"
+                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 placeholder="Ej: Banda de Cumbia, Banda Full, Dúo Acústico"
+                 required />
+          {% if form.name.errors %}
+            <span class="text-red-500 text-xs mt-1">{{ form.name.errors[0] }}</span>
+          {% endif %}
+        </div>
+
+        <!-- Presupuesto -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-money-bill-wave mr-2" style="color:#f59e0b;"></i>Presupuesto total
+            </span>
+            <span class="label-text-alt text-xs text-gray-400">Precio del show con esta banda</span>
+          </label>
+          <div class="flex gap-2">
+            <select name="currency" class="marifa-input px-3 py-3 text-gray-900" style="flex:0 0 auto; width:auto;">
+              {% for value, label in form.currency.choices %}
+              <option value="{{ value }}" {% if (form.currency.data or 'PYG') == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            <input type="number" name="price"
+                   value="{{ form.price.data or '' }}"
+                   class="marifa-input flex-1 px-4 py-3 text-gray-900 placeholder-gray-400"
+                   placeholder="0"
+                   min="0" step="1000" />
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-sticky-note mr-2" style="color:#f59e0b;"></i>Descripción / Notas
+            </span>
+          </label>
+          <textarea name="description"
+                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
+                    rows="2"
+                    placeholder="Ej: Banda completa para eventos grandes, incluye sonido">{{ form.description.data or '' }}</textarea>
+        </div>
+
+        <!-- Músicos de la banda -->
+        {% if musicians %}
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-users mr-2 text-violet-600"></i>Integrantes de la banda
+            </span>
+            <span class="label-text-alt text-xs text-gray-400">Seleccioná los músicos</span>
+          </label>
+
+          <!-- Chips seleccionados -->
+          <div id="selected-musicians" class="flex flex-wrap gap-2 mb-3 min-h-8"></div>
+
+          <!-- Lista de músicos -->
+          <div class="border border-gray-200 rounded-xl overflow-hidden" style="max-height:260px;overflow-y:auto;">
+            {% set ns = namespace(current_instrument='') %}
+            {% for m in musicians %}
+              {% if m.instrument != ns.current_instrument %}
+                {% set ns.current_instrument = m.instrument %}
+                <div class="px-3 py-1 text-xs font-bold text-gray-500 bg-gray-50 border-b border-gray-100 sticky top-0">
+                  {{ m.instrument_emoji }} {{ m.instrument }}
+                </div>
+              {% endif %}
+              <div class="musician-pick-item flex items-center gap-2 px-3 py-2 cursor-pointer border-b border-gray-50 hover:bg-violet-50 transition-colors"
+                   data-id="{{ m.id }}"
+                   data-name="{{ m.name }}"
+                   data-instrument="{{ m.instrument }}"
+                   data-emoji="{{ m.instrument_emoji }}"
+                   onclick="toggleMusician(this)">
+                <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0"
+                     style="background: linear-gradient(135deg, #7c3aed, #f43f5e);">
+                  {{ m.name[0].upper() }}
+                </div>
+                <span class="text-sm font-medium text-gray-800 flex-1">{{ m.name }}</span>
+                <i class="fas fa-check-circle text-violet-600 check-icon" style="display:none;"></i>
+                <input type="hidden" name="musician_ids" value="{{ m.id }}"
+                       id="musician-hidden-{{ m.id }}" disabled />
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        {% else %}
+        <div class="form-control">
+          <div class="flex items-center gap-2 p-3 rounded-xl" style="background:#fdf4ff;border:1px dashed #e9d5ff;">
+            <i class="fas fa-users text-violet-400"></i>
+            <span class="text-sm text-gray-600">
+              Primero <a href="{{ url_for('musicians.new') }}" class="text-violet-600 font-medium hover:underline">agregá músicos</a> a tu directorio.
+            </span>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+          {% if band %}
+            <i class="fas fa-save mr-2"></i>Guardar cambios
+          {% else %}
+            <i class="fas fa-plus mr-2"></i>Crear banda
+          {% endif %}
+        </button>
+        <a href="{{ url_for('bands.index') }}" class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const assignedIds = new Set({{ assigned_ids | tojson }});
+
+function toggleMusician(el) {
+  const id = parseInt(el.dataset.id);
+  const hidden = document.getElementById('musician-hidden-' + id);
+  const icon   = el.querySelector('.check-icon');
+  if (assignedIds.has(id)) {
+    assignedIds.delete(id);
+    hidden.disabled = true;
+    icon.style.display = 'none';
+    el.style.background = '';
+    const chip = document.getElementById('chip-' + id);
+    if (chip) chip.remove();
+  } else {
+    assignedIds.add(id);
+    hidden.disabled = false;
+    icon.style.display = 'block';
+    el.style.background = '#f5f3ff';
+    addChip(id, el.dataset.name, el.dataset.emoji);
+  }
+}
+
+function addChip(id, name, emoji) {
+  const container = document.getElementById('selected-musicians');
+  const chip = document.createElement('span');
+  chip.id = 'chip-' + id;
+  chip.className = 'inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium';
+  chip.style = 'background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd;';
+  chip.innerHTML = `${emoji} ${name} <button type="button" onclick="toggleMusician(document.querySelector('[data-id=\\'${id}\\']'))" style="margin-left:2px;opacity:0.6;">×</button>`;
+  container.appendChild(chip);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  assignedIds.forEach(function(id) {
+    const el = document.querySelector('[data-id="' + id + '"]');
+    if (el) {
+      document.getElementById('musician-hidden-' + id).disabled = false;
+      el.querySelector('.check-icon').style.display = 'block';
+      el.style.background = '#f5f3ff';
+      addChip(id, el.dataset.name, el.dataset.emoji);
+    }
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,7 @@
+venv/
+instance/
+__pycache__/
+*.pyc
+.env
+migrate_users.py
+seed.py

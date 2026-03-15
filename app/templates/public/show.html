@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>{{ show.name }} — MariFá</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --marifa-bg: #0d0d1a;
+      --marifa-surface: #13132a;
+      --marifa-border: #1e1e40;
+      --marifa-accent: #c026d3;
+      --marifa-gold: #f59e0b;
+    }
+
+    body {
+      background-color: var(--marifa-bg);
+      color: #e2e8f0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .marifa-logo {
+      font-family: 'Playfair Display', serif;
+      font-weight: 900;
+      font-style: italic;
+      background: linear-gradient(135deg, #c026d3, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .song-card {
+      background: rgba(19, 19, 42, 0.8);
+      border: 1px solid var(--marifa-border);
+      border-radius: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .song-card:hover {
+      border-color: rgba(192, 38, 211, 0.4);
+    }
+
+    .song-number {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: var(--marifa-accent);
+      opacity: 0.25;
+      line-height: 1;
+      min-width: 56px;
+    }
+
+    .song-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    .key-badge {
+      background: var(--marifa-gold);
+      color: #0d0d1a;
+      font-weight: 700;
+      font-size: 0.85rem;
+      padding: 3px 12px;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    .break-row {
+      text-align: center;
+      padding: 16px;
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      border-radius: 12px;
+      color: #f59e0b;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      font-size: 0.85rem;
+      background: rgba(245, 158, 11, 0.05);
+    }
+
+    .notes-box {
+      background: rgba(245, 158, 11, 0.08);
+      border-left: 3px solid rgba(245, 158, 11, 0.4);
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      color: #fbbf24;
+      font-size: 0.85rem;
+      font-style: italic;
+    }
+
+    .genre-badge {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: rgba(192, 38, 211, 0.2);
+      color: #e879f9;
+      border: 1px solid rgba(192, 38, 211, 0.3);
+    }
+
+    .staff-divider {
+      height: 16px;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent, transparent 2px,
+        rgba(192, 38, 211, 0.1) 2px, rgba(192, 38, 211, 0.1) 3px
+      );
+      margin: 8px 0;
+      border-radius: 2px;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--marifa-bg); }
+    ::-webkit-scrollbar-thumb { background: var(--marifa-border); border-radius: 2px; }
+  </style>
+</head>
+<body data-theme="night">
+
+<!-- HEADER -->
+<div style="background: linear-gradient(180deg, #0d0d1a 0%, #0d0d1a 100%); border-bottom: 1px solid #1e1e40;"
+     class="sticky top-0 z-10 px-4 py-3">
+  <div class="max-w-lg mx-auto flex items-center justify-between">
+    <div>
+      <span class="marifa-logo text-xl">♪ MariFá</span>
+    </div>
+    <a href="/p/{{ show.public_token }}/pdf"
+       class="btn btn-xs gap-1"
+       style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #0d0d1a; border: none; font-weight: 600;">
+      <i class="fas fa-file-pdf"></i> PDF
+    </a>
+  </div>
+</div>
+
+<!-- SHOW INFO -->
+<div class="max-w-lg mx-auto px-4 pt-6 pb-2">
+  <h1 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 900; color: white;"
+      class="leading-tight mb-2">{{ show.name }}</h1>
+
+  <div class="flex flex-wrap gap-3 text-sm text-gray-400 mb-3">
+    <span><i class="fas fa-calendar text-purple-400 mr-1"></i>{{ show.date.strftime('%d/%m/%Y') }}</span>
+    {% if show.venue %}<span><i class="fas fa-map-marker-alt text-purple-400 mr-1"></i>{{ show.venue }}</span>{% endif %}
+    {% if show.city %}<span><i class="fas fa-city text-purple-400 mr-1"></i>{{ show.city }}</span>{% endif %}
+  </div>
+
+  <!-- Stats -->
+  <div class="flex gap-4 mb-2">
+    <div class="text-center">
+      <p style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #c026d3;">
+        {{ items|selectattr('is_break', 'equalto', False)|list|length }}
+      </p>
+      <p class="text-gray-500 text-xs">Canciones</p>
+    </div>
+    <div class="text-center">
+      <p style="font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 900; color: #f59e0b;">
+        {{ show.total_duration_display }}
+      </p>
+      <p class="text-gray-500 text-xs">Duración</p>
+    </div>
+  </div>
+
+  {% if show.general_notes %}
+  <div class="notes-box mb-4">
+    <i class="fas fa-sticky-note mr-2"></i>{{ show.general_notes }}
+  </div>
+  {% endif %}
+
+  <div class="staff-divider"></div>
+</div>
+
+<!-- SETLIST -->
+<div class="max-w-lg mx-auto px-4" style="padding-bottom: 148px;">
+  <div class="space-y-3">
+    {% set song_counter = namespace(n=0) %}
+    {% for item in items %}
+
+      {% if item.is_break %}
+      <div class="break-row">⏸ {{ item.break_label or 'INTERMEDIO' }}</div>
+
+      {% else %}
+      {% set song_counter.n = song_counter.n + 1 %}
+      <div class="song-card p-4">
+        <div class="flex items-start gap-3">
+          <span class="song-number flex-shrink-0">{{ song_counter.n }}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-start justify-between gap-2 mb-1">
+              <p class="song-title leading-tight">{{ item.song.title }}</p>
+              {% if item.song.key %}
+              <span class="key-badge flex-shrink-0">{{ item.song.key }}</span>
+              {% endif %}
+            </div>
+            <p class="text-gray-400 text-sm mb-2">{{ item.song.original_artist or '' }}</p>
+            <div class="flex items-center gap-2 flex-wrap mb-2">
+              <span class="genre-badge">{{ item.song.genre_emoji }} {{ item.song.genre }}</span>
+              {% if item.song.bpm %}
+              <span class="text-gray-600 text-xs">{{ item.song.bpm }} BPM</span>
+              {% endif %}
+              {% if item.song.duration_sec %}
+              <span class="text-gray-600 text-xs">⏱ {{ item.song.duration_display }}</span>
+              {% endif %}
+            </div>
+            {% set display_notes = item.notes_override or item.song.musician_notes %}
+            {% if display_notes %}
+            <div class="notes-box">{{ display_notes }}</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+    {% endfor %}
+  </div>
+</div>
+
+<!-- FOOTER FIJO -->
+<div class="fixed bottom-0 left-0 right-0 z-10"
+     style="background: rgba(13,13,26,0.97); backdrop-filter: blur(12px);">
+  <!-- Línea separadora superior -->
+  <div style="height: 1px; background: #1e1e40;"></div>
+  <!-- Contenido: botones -->
+  <div class="max-w-lg mx-auto flex items-center justify-between px-4 py-3">
+    <div>
+      <p class="text-gray-500 text-xs">Compartir setlist</p>
+    </div>
+    <div class="flex gap-2">
+      <button type="button" onclick="shareShowWhatsapp()"
+              class="btn btn-sm gap-2"
+              style="background: #25D366; color: white; border: none;">
+        <i class="fab fa-whatsapp"></i> WhatsApp
+      </button>
+      <button onclick="navigator.share ? navigator.share({title: '{{ show.name }}', url: window.location.href}) : navigator.clipboard.writeText(window.location.href)"
+              class="btn btn-sm btn-outline border-purple-700 text-purple-400">
+        <i class="fas fa-share-alt"></i>
+      </button>
+    </div>
+  </div>
+  <!-- Spacer para barra de navegación Android/iOS — fondo sólido, nunca cubre los botones -->
+  <div style="height: 72px;"></div>
+</div>
+
+<script>
+function shareShowWhatsapp() {
+  const url = window.location.href;
+  const text = 'Setlist completo de {{ show.name|e }}: ' + url;
+  window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+}
+</script>
+</body>
+</html>

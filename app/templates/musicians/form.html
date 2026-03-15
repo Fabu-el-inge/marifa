@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}{% if musician %}Editar Músico{% else %}Nuevo Músico{% endif %}{% endblock %}
+{% block page_title %}{% if musician %}Editar Músico{% else %}Nuevo Músico{% endif %}{% endblock %}
+{% block page_subtitle %}{% if musician %}{{ musician.name }}{% else %}Agregar a tu banda{% endif %}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('musicians.index') }}" class="btn btn-ghost btn-sm gap-2" style="color:#6b7280;">
+  <i class="fas fa-arrow-left"></i> Mis Músicos
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+  <div class="marifa-card p-8">
+    <div class="mb-6">
+      <h2 class="font-serif text-2xl font-bold mb-1" style="color:#1e1b2e;">
+        {% if musician %}✏️ Editar Músico{% else %}🎸 Nuevo Músico{% endif %}
+      </h2>
+      <div class="staff-divider"></div>
+    </div>
+
+    <form method="POST">
+      {{ form.hidden_tag() }}
+      <div class="space-y-5">
+
+        <!-- Nombre -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-user mr-2" style="color:#f43f5e;"></i>Nombre *
+            </span>
+          </label>
+          <input type="text" name="name"
+                 value="{{ form.name.data or '' }}"
+                 class="marifa-input w-full px-4 py-3"
+                 placeholder="Nombre del músico" required />
+          {% if form.name.errors %}<p class="text-red-500 text-xs mt-1">{{ form.name.errors[0] }}</p>{% endif %}
+        </div>
+
+        <!-- Instrumento -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-music mr-2" style="color:#f43f5e;"></i>Instrumento / Rol *
+            </span>
+          </label>
+          <select name="instrument" class="marifa-input w-full px-4 py-3">
+            {% for value, label in form.instrument.choices %}
+            <option value="{{ value }}" {% if form.instrument.data == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fab fa-whatsapp mr-2" style="color:#25D366;"></i>Teléfono / WhatsApp
+            </span>
+          </label>
+          <input type="tel" name="phone"
+                 value="{{ form.phone.data or '' }}"
+                 class="marifa-input w-full px-4 py-3"
+                 placeholder="+595 981 123 456" />
+          <span class="label-text-alt text-xs mt-1" style="color:#6b7280;">
+            Con código de país. Se usará para WhatsApp directo.
+          </span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-envelope mr-2" style="color:#f43f5e;"></i>Email
+            </span>
+          </label>
+          <input type="email" name="email"
+                 value="{{ form.email.data or '' }}"
+                 class="marifa-input w-full px-4 py-3"
+                 placeholder="musico@ejemplo.com" />
+        </div>
+
+        <!-- Notas -->
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text text-gray-700 font-medium">
+              <i class="fas fa-sticky-note mr-2" style="color:#f59e0b;"></i>Notas
+            </span>
+          </label>
+          <textarea name="notes" class="marifa-input w-full px-4 py-3 resize-none" rows="3"
+                    placeholder="Referencias, disponibilidad, tarifa...">{{ form.notes.data or '' }}</textarea>
+        </div>
+
+      </div>
+
+      <div class="flex gap-3 mt-8">
+        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+          {% if musician %}<i class="fas fa-save mr-2"></i>Guardar
+          {% else %}<i class="fas fa-plus mr-2"></i>Agregar a la Banda
+          {% endif %}
+        </button>
+        <a href="{{ url_for('musicians.index') }}" class="btn btn-ghost btn-outline border-gray-300" style="color:#6b7280;">
+          Cancelar
+        </a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
