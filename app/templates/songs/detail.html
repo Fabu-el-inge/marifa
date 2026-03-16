@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ song.title }}{% endblock %}
+{% block page_title %}{{ song.title }}{% endblock %}
+{% block page_subtitle %}{{ song.original_artist or '' }}{% endblock %}
+
+{% block topbar_actions %}
+<a href="{{ url_for('songs.index') }}" class="btn btn-ghost btn-sm gap-1">
+  <i class="fas fa-arrow-left"></i> Volver
+</a>
+<a href="{{ url_for('songs.edit', song_id=song.id) }}" class="btn btn-marifa btn-sm gap-1">
+  <i class="fas fa-edit"></i> Editar
+</a>
+<a href="{{ url_for('songs.print_song', song_id=song.id) }}" target="_blank" class="btn btn-ghost btn-sm gap-1">
+  <i class="fas fa-print"></i>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <!-- Meta -->
+  <div class="flex items-center gap-3 flex-wrap mb-4">
+    <span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">
+      {{ song.genre_emoji }} {{ song.genre }}
+    </span>
+    {% if song.key %}
+    <span class="text-xs font-bold" style="color:#d97706;">
+      <i class="fas fa-key mr-1"></i>{{ song.key }}
+    </span>
+    {% endif %}
+    {% if song.bpm %}
+    <span class="text-xs text-gray-500">{{ song.bpm }} BPM</span>
+    {% endif %}
+    {% if song.duration_display and song.duration_display != '--:--' %}
+    <span class="text-xs text-gray-500">
+      <i class="fas fa-clock mr-1"></i>{{ song.duration_display }}
+    </span>
+    {% endif %}
+  </div>
+
+  <!-- Notas para musicos -->
+  {% if song.musician_notes %}
+  <div class="p-3 rounded-xl mb-4" style="background:#fdf4ff; border:1px solid #e9d5ff;">
+    <p class="text-xs font-bold text-violet-700 mb-1">
+      <i class="fas fa-sticky-note mr-1"></i>Notas para musicos
+    </p>
+    <p class="text-sm text-gray-700 whitespace-pre-wrap">{{ song.musician_notes }}</p>
+  </div>
+  {% endif %}
+
+  <!-- Letra -->
+  {% if song.lyrics %}
+  <div class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-mono">{{ song.lyrics }}</div>
+  {% else %}
+  <div class="text-center py-8 text-gray-400">
+    <i class="fas fa-music text-2xl mb-2 block opacity-30"></i>
+    Esta cancion no tiene letra cargada.
+    <br>
+    <a href="{{ url_for('songs.edit', song_id=song.id) }}" class="text-violet-600 text-sm hover:underline mt-2 inline-block">
+      <i class="fas fa-edit mr-1"></i>Agregar letra
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- YouTube -->
+  {% if song.youtube_embed_url %}
+  <div class="mt-4 p-3 rounded-xl" style="background:#fff1f2; border:1px solid #fecdd3;">
+    <p class="text-xs font-bold mb-2" style="color:#e11d48;">
+      <i class="fab fa-youtube mr-1"></i>Audio de referencia (YouTube)
+    </p>
+    <button id="yt-play-btn" onclick="loadYt()" class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold text-white" style="background:#e11d48;">
+      <i class="fab fa-youtube"></i> Escuchar
+    </button>
+    <div id="yt-player" style="display:none; position:relative; height:52px; border-radius:6px; overflow:hidden; background:#000; margin-top:6px;">
+      <iframe id="yt-iframe" src="" frameborder="0" allow="autoplay; encrypted-media" style="position:absolute; bottom:0; left:0; width:100%; height:220px; border:none;"></iframe>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Grabacion -->
+  {% if song.recording_url %}
+  <div class="mt-4 p-3 rounded-xl" style="background:#fdf4ff; border:1px solid #e9d5ff;">
+    <p class="text-xs font-bold text-violet-700 mb-2">
+      <i class="fas fa-microphone mr-1"></i>Grabacion de referencia
+    </p>
+    <audio id="rec-audio" controls class="w-full" style="height:36px;">
+      <source src="{{ song.recording_url }}" />
+    </audio>
+    <button onclick="downloadRec()" class="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 mt-2 bg-transparent border-none cursor-pointer">
+      <i class="fas fa-download"></i> Descargar audio
+    </button>
+  </div>
+  {% endif %}
+
+</div>
+
+<script>
+{% if song.youtube_embed_url %}
+function loadYt() {
+  document.getElementById('yt-iframe').src = {{ song.youtube_embed_url|tojson }};
+  document.getElementById('yt-player').style.display = 'block';
+  document.getElementById('yt-play-btn').style.display = 'none';
+}
+{% endif %}
+
+function downloadRec() {
+  var audio = document.getElementById('rec-audio');
+  if (!audio || !audio.currentSrc) return;
+  fetch(audio.currentSrc)
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'grabacion.webm';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+}
+</script>
+{% endblock %}

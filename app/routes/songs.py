@@ -229,6 +229,13 @@ def delete(song_id):
     return redirect(url_for('songs.index'))
 
 
+@songs_bp.route('/<int:song_id>')
+@login_required
+def detail(song_id):
+    song = Song.query.filter_by(id=song_id, user_id=current_user.id, is_active=True).first_or_404()
+    return render_template('songs/detail.html', song=song)
+
+
 @songs_bp.route('/<int:song_id>/print')
 @login_required
 def print_song(song_id):
