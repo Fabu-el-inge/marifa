@@ -449,8 +449,8 @@ function openLyricsModal(id) {
   let metaHtml = '';
   if (s.genre)    metaHtml += `<span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">${s.genre}</span>`;
   if (s.key)      metaHtml += `<span class="text-xs font-bold" style="color:#d97706;"><i class="fas fa-key mr-1"></i>${s.key}</span>`;
-  metaHtml += `<span class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="editBpm()" title="Clic para editar BPM"><i class="fas fa-heartbeat mr-1"></i><span id="modal-bpm-display">${s.bpm ? s.bpm + ' BPM' : 'Sin BPM'}</span></span>`;
-  metaHtml += `<span class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="editDuration()" title="Clic para editar duración"><i class="fas fa-clock mr-1"></i><span id="modal-dur-display">${s.duration || 'Sin duración'}</span></span>`;
+  if (s.bpm)      metaHtml += `<span class="text-xs text-gray-500">${s.bpm} BPM</span>`;
+  if (s.duration) metaHtml += `<span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${s.duration}</span>`;
   metaEl.innerHTML = metaHtml;
 
   // Guardar song ID para grabación
