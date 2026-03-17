@@ -260,7 +260,7 @@
           {% if song %}
             <i class="fas fa-save mr-2"></i>Guardar cambios
           {% else %}
-            <i class="fas fa-plus mr-2"></i>Agregar al Catálogo
+            Agregar al Catálogo
           {% endif %}
         </button>
         <a href="{{ request.args.get('next') or url_for('songs.index') }}" class="btn btn-ghost btn-outline border-gray-300 text-gray-700">
