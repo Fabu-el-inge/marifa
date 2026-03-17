@@ -222,6 +222,16 @@
                   style="position:absolute; bottom:0; left:0; width:100%; height:220px; border:none;"></iframe>
         </div>
       </div>
+      <!-- Grabación de referencia -->
+      <div id="modal-recording" class="mt-4 p-3 rounded-xl" style="background:#fdf4ff; border:1px solid #e9d5ff; display:none;">
+        <p class="text-xs font-bold text-violet-700 mb-2">
+          <i class="fas fa-microphone mr-1"></i>Grabación de referencia
+        </p>
+        <audio id="modal-audio" controls class="w-full" style="height:36px;"></audio>
+        <button id="modal-audio-download" onclick="downloadRecording()" class="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 mt-2 bg-transparent border-none cursor-pointer">
+          <i class="fas fa-download"></i> Descargar audio
+        </button>
+      </div>
       <div id="modal-no-lyrics" class="text-center py-8 text-gray-400" style="display:none;">
         <i class="fas fa-music text-2xl mb-2 block opacity-30"></i>
         Esta canción no tiene letra cargada.
@@ -661,7 +671,12 @@ var SONGS_DATA = {
         document.getElementById('modal-rec-existing-audio').src = d.url;
         document.getElementById('modal-rec-existing').style.display = 'block';
         document.getElementById('modal-rec-new').style.display = 'none';
-        document.getElementById('modal-rec-hint').textContent = 'Grabación guardada.';
+        document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
+        document.getElementById('modal-rec-toggle').style.display = 'none';
+        // Actualizar reproductor principal
+        document.getElementById('modal-audio').src = d.url;
+        document.getElementById('modal-recording').style.display = 'block';
+        if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = d.url;
         _modalBlob = null;
       }
     });
@@ -683,6 +698,69 @@ var SONGS_DATA = {
         document.getElementById('modal-rec-existing-audio').src = '';
         document.getElementById('modal-rec-existing').style.display = 'none';
         document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+        document.getElementById('modal-rec-toggle').style.display = 'flex';
+        // Ocultar reproductor principal
+        document.getElementById('modal-audio').src = '';
+        document.getElementById('modal-recording').style.display = 'none';
+        if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = '';
+      }
+    });
+  }
+
+  function downloadRecording() {
+    var url = document.getElementById('modal-audio').src;
+    if (!url) return;
+    fetch(url)
+      .then(function(r) { return r.blob(); })
+      .then(function(blob) {
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'grabacion.webm';
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+  }
+
+  function editBpm() {
+    var current = SONGS_DATA[_modalSongId] ? SONGS_DATA[_modalSongId].bpm : '';
+    var val = prompt('BPM:', current || '');
+    if (val === null) return;
+    var bpm = val.trim() === '' ? null : parseInt(val);
+    if (bpm !== null && (isNaN(bpm) || bpm < 1 || bpm > 400)) { alert('BPM debe ser entre 1 y 400'); return; }
+    fetch('/songs/' + _modalSongId + '/quick-update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_B },
+      body: JSON.stringify({ bpm: bpm })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        document.getElementById('modal-bpm-display').innerHTML = d.bpm ? d.bpm + ' BPM' : '<i class="fas fa-heartbeat mr-1"></i>+ BPM';
+        if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].bpm = d.bpm;
+      }
+    });
+  }
+
+  function editDuration() {
+    var current = SONGS_DATA[_modalSongId] ? SONGS_DATA[_modalSongId].duration : '';
+    var val = prompt('Duración (mm:ss):', current || '');
+    if (val === null) return;
+    var secs = null;
+    if (val.trim() !== '') {
+      var parts = val.trim().split(':');
+      if (parts.length === 2) {
+        secs = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+      } else if (parts.length === 1) {
+        secs = parseInt(parts[0]) * 60;
+      }
+      if (isNaN(secs) || secs < 0) { alert('Formato: mm:ss (ej: 3:45)'); return; }
+    }
+    fetch('/songs/' + _modalSongId + '/quick-update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_B },
+      body: JSON.stringify({ duration_sec: secs })
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        document.getElementById('modal-dur-display').innerHTML = '<i class="fas fa-clock mr-1"></i>' + (d.duration_display && d.duration_display !== '--:--' ? d.duration_display : '+ Duración');
+        if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].duration = d.duration_display;
       }
     });
   }
@@ -716,8 +794,8 @@ var SONGS_DATA = {
     var metaEl = document.getElementById('modal-meta'), metaHtml = '';
     if (s.genre)    metaHtml += `<span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">${s.genre}</span>`;
     if (s.key)      metaHtml += `<span class="text-xs font-bold" style="color:#d97706;"><i class="fas fa-key mr-1"></i>${s.key}</span>`;
-    if (s.bpm)      metaHtml += `<span class="text-xs text-gray-500">${s.bpm} BPM</span>`;
-    if (s.duration) metaHtml += `<span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${s.duration}</span>`;
+    metaHtml += `<span id="modal-bpm-display" class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="event.stopPropagation();editBpm()" title="Click para editar BPM">${s.bpm ? s.bpm + ' BPM' : '<i class=&quot;fas fa-heartbeat mr-1&quot;></i>+ BPM'}</span>`;
+    metaHtml += `<span id="modal-dur-display" class="text-xs text-gray-500 cursor-pointer hover:text-violet-600" onclick="event.stopPropagation();editDuration()" title="Click para editar duración"><i class="fas fa-clock mr-1"></i>${s.duration && s.duration !== '--:--' ? s.duration : '+ Duración'}</span>`;
     metaEl.innerHTML = metaHtml;
 
     var lyricsEl = document.getElementById('modal-lyrics'), noLyricsEl = document.getElementById('modal-no-lyrics');
@@ -749,9 +827,18 @@ var SONGS_DATA = {
     if (s.recordingUrl) {
       document.getElementById('modal-rec-existing-audio').src = s.recordingUrl;
       document.getElementById('modal-rec-existing').style.display = 'block';
+      document.getElementById('modal-rec-toggle').style.display = 'none';
+      document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
+      // Mostrar reproductor principal
+      document.getElementById('modal-audio').src = s.recordingUrl;
+      document.getElementById('modal-recording').style.display = 'block';
     } else {
       document.getElementById('modal-rec-existing-audio').src = '';
       document.getElementById('modal-rec-existing').style.display = 'none';
+      document.getElementById('modal-rec-toggle').style.display = 'flex';
+      document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+      document.getElementById('modal-audio').src = '';
+      document.getElementById('modal-recording').style.display = 'none';
     }
 
     // YouTube
@@ -769,11 +856,16 @@ var SONGS_DATA = {
 
   function closeLyricsModal() {
     document.getElementById('lyrics-modal').style.display = 'none';
+    var a = document.getElementById('modal-audio');
+    if (a) { a.pause(); a.src = ''; }
     if (_modalIsRec && _modalMr && _modalMr.state !== 'inactive') _modalMr.stop();
     clearInterval(_modalTimerInt); _modalIsRec = false;
     document.getElementById('modal-yt-iframe').src = '';
     document.getElementById('modal-yt-player').style.display = 'none';
     document.getElementById('modal-yt-play-btn').style.display = 'flex';
+    document.getElementById('modal-yt-audio').style.display = 'none';
+    document.getElementById('modal-recording').style.display = 'none';
+    _currentYtEmbed = '';
   }
 
   // Override toggleNotes for server-rendered items
