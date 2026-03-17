@@ -153,6 +153,8 @@ h1, h2, h3, .font-serif {
   border-radius: 20px;
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
   transition: all 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(244,63,94,0.1);
 }
 
 .show-card:hover {
