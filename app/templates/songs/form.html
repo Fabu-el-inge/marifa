@@ -28,26 +28,26 @@
       </p>
 
       <!-- Buscador -->
-      <div class="flex gap-2 mb-2">
+      <div class="flex flex-col sm:flex-row gap-2 mb-2">
         <input type="text" id="yt-search"
                class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
                placeholder="Buscá por nombre: ej. La Puerta — Aria de Triana" />
         <button type="button" onclick="searchYoutube()"
                 id="yt-search-btn"
-                class="btn btn-sm px-4 font-semibold flex-shrink-0"
+                class="btn btn-sm px-4 py-2 font-semibold flex-shrink-0 w-full sm:w-auto"
                 style="background:#ff0000; color:white; border:none;">
           <i class="fas fa-search mr-1"></i>Buscar
         </button>
       </div>
 
       <!-- O pegar link directo -->
-      <div class="flex gap-2 mb-2">
+      <div class="flex flex-col sm:flex-row gap-2 mb-2">
         <input type="text" id="yt-url"
                class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
                placeholder="O pegá el link de YouTube directamente..." />
         <button type="button" onclick="importFromYoutube()"
                 id="yt-btn"
-                class="btn btn-sm px-4 font-semibold flex-shrink-0"
+                class="btn btn-sm px-4 py-2 font-semibold flex-shrink-0 w-full sm:w-auto"
                 style="background:#cc0000; color:white; border:none;">
           <i class="fas fa-link mr-1"></i>Importar
         </button>
@@ -192,36 +192,39 @@
 
         <!-- Letra (colapsable) -->
         <div x-data="{ open: {{ 'true' if (form.lyrics.data) else 'false' }}, init() { window._lyricsOpen = this.open; } }">
-          <div class="flex items-center gap-3 flex-wrap mb-2">
+          <div class="mb-2">
             <button type="button" id="lyrics-toggle"
                     @click="open = !open; window._lyricsOpen = open; if (open) $nextTick(() => autoResize(document.getElementById('lyrics')))"
-                    class="flex items-center gap-2 text-gray-700 hover:text-gray-800 text-sm transition-colors">
+                    class="flex items-center gap-2 text-gray-700 hover:text-gray-800 text-sm transition-colors mb-2">
               <i class="fas fa-chevron-right transition-transform" :class="{ 'rotate-90': open }"></i>
               <i class="fas fa-align-left mr-1 text-violet-600"></i>
               Letra / Acordes (opc.)
             </button>
-            <button type="button" id="fetch-lyrics-btn" onclick="fetchLyricsAuto()"
-                    class="btn btn-xs gap-1 font-medium"
-                    style="background:#ede9fe; color:#6d28d9; border:none;">
-              <i class="fas fa-magic"></i>Buscar letra
-            </button>
-            <button type="button" id="generate-chords-btn" onclick="generateChords()"
-                    class="btn btn-xs gap-1 font-medium"
-                    style="background:#fef3c7; color:#92400e; border:none;">
-              <i class="fas fa-guitar"></i>Generar acordes
-            </button>
-            <button type="button" id="rec-btn" onclick="toggleRecording()"
-                    class="btn btn-xs gap-1 font-medium"
-                    style="background:#fee2e2; color:#dc2626; border:none;">
-              <i id="rec-icon" class="fas fa-microphone"></i><span id="rec-btn-label">Grabar</span>
-            </button><button type="button" onclick="document.getElementById('rec-file-input').click()"
-                    class="btn btn-xs gap-1 font-medium"
-                    style="background:#f3e8ff; color:#7c3aed; border:none; margin-left:-2px;">
-              <i class="fas fa-upload"></i>Audio
-            </button>
-            <span id="fetch-lyrics-status" class="text-xs" style="display:none;"></span>
-            <span id="generate-chords-status" class="text-xs" style="display:none;"></span>
-            <span id="rec-timer" class="text-xs font-bold text-red-500" style="display:none;">0:00</span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button type="button" id="fetch-lyrics-btn" onclick="fetchLyricsAuto()"
+                      class="btn btn-xs gap-1 font-medium"
+                      style="background:#ede9fe; color:#6d28d9; border:none;">
+                <i class="fas fa-magic"></i>Buscar letra
+              </button>
+              <button type="button" id="generate-chords-btn" onclick="generateChords()"
+                      class="btn btn-xs gap-1 font-medium"
+                      style="background:#fef3c7; color:#92400e; border:none;">
+                <i class="fas fa-guitar"></i>Acordes
+              </button>
+              <button type="button" id="rec-btn" onclick="toggleRecording()"
+                      class="btn btn-xs gap-1 font-medium"
+                      style="background:#fee2e2; color:#dc2626; border:none;">
+                <i id="rec-icon" class="fas fa-microphone"></i><span id="rec-btn-label">Grabar</span>
+              </button>
+              <button type="button" onclick="document.getElementById('rec-file-input').click()"
+                      class="btn btn-xs gap-1 font-medium"
+                      style="background:#f3e8ff; color:#7c3aed; border:none;">
+                <i class="fas fa-upload"></i>Audio
+              </button>
+              <span id="rec-timer" class="text-xs font-bold text-red-500" style="display:none;">0:00</span>
+            </div>
+            <span id="fetch-lyrics-status" class="text-xs mt-1 block" style="display:none;"></span>
+            <span id="generate-chords-status" class="text-xs mt-1 block" style="display:none;"></span>
           </div>
           <!-- Grabación: feedback inline -->
           {% if song and song.recording_path %}
