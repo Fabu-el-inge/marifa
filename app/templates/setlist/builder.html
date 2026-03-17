@@ -10,22 +10,22 @@
 
 {% block topbar_actions %}
 
-<!-- Stats del setlist -->
-<div class="flex items-center gap-2 flex-shrink-0">
-  <div class="flex items-center gap-1 px-2 py-1 rounded-lg" style="background:#f5f0ff; border:1px solid #e9d5ff;">
-    <i class="fas fa-music text-xs" style="color:#7c3aed;"></i>
-    <span class="font-black font-serif text-sm" style="color:#7c3aed;" id="song-count">{{ items|selectattr('is_break', 'equalto', False)|list|length }}</span>
+<!-- Stats -->
+<div class="flex items-center gap-1">
+  <div class="flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg" style="background:#f5f0ff; border:1px solid #e9d5ff;">
+    <i class="fas fa-music" style="color:#7c3aed; font-size:0.6rem;"></i>
+    <span class="font-black font-serif text-xs" style="color:#7c3aed;" id="song-count">{{ items|selectattr('is_break', 'equalto', False)|list|length }}</span>
   </div>
-  <div class="flex items-center gap-1 px-2 py-1 rounded-lg" style="background:#fffbeb; border:1px solid #fde68a;">
-    <i class="fas fa-clock text-xs" style="color:#d97706;"></i>
-    <span class="font-bold text-sm" style="color:#d97706;" id="total-duration">{{ show.total_duration_display }}</span>
+  <div class="flex items-center gap-1 px-1.5 py-0.5 md:px-2 md:py-1 rounded-lg" style="background:#fffbeb; border:1px solid #fde68a;">
+    <i class="fas fa-clock" style="color:#d97706; font-size:0.6rem;"></i>
+    <span class="font-bold text-xs" style="color:#d97706;" id="total-duration">{{ show.total_duration_display }}</span>
   </div>
 </div>
 
-<!-- Chip músicos del show -->
+<!-- Músicos (desktop only) -->
 {% set _musicians = show.musicians.all() %}
 {% if _musicians %}
-<div class="relative flex-shrink-0 hidden md:block" id="musicians-chip-wrapper">
+<div class="relative hidden md:block" id="musicians-chip-wrapper">
   <button type="button" onclick="toggleMusiciansPopover()"
           class="flex items-center gap-1 px-2 py-1 rounded-lg"
           style="background:#fdf4ff; border:1px solid #e9d5ff; cursor:pointer;">
@@ -36,8 +36,6 @@
     <i class="fas fa-chevron-down text-xs" id="musicians-chip-arrow"
        style="color:#c4b5fd; transition:transform 0.2s;"></i>
   </button>
-
-  <!-- Popover con info de músicos -->
   <div id="musicians-popover"
        style="display:none; position:absolute; top:calc(100% + 8px); left:0; z-index:300;
               background:white; border:1px solid #e9d5ff; border-radius:16px;
@@ -71,7 +69,7 @@
 {% endif %}
 
 {% if show.is_public %}
-<!-- Link público compacto -->
+<!-- Link público (desktop only) -->
 <div class="hidden md:flex items-center gap-1 px-2 py-1 rounded-lg"
      style="background:#f0fdf4; border:1px solid #bbf7d0; max-width:200px;">
   <i class="fas fa-globe text-xs" style="color:#059669; flex-shrink:0;"></i>
@@ -82,35 +80,31 @@
     <i class="fas fa-copy text-xs"></i>
   </button>
 </div>
-<!-- Mobile: solo botones de copiar/compartir -->
-<div class="flex md:hidden items-center gap-1">
-  <button onclick="copyPublicLink()" class="btn btn-xs btn-ghost" style="color:#059669;" title="Copiar link">
-    <i class="fas fa-link text-xs"></i>
-  </button>
-  <button type="button" onclick="shareWhatsapp()" class="btn btn-xs btn-ghost" style="color:#25D366;" title="WhatsApp">
-    <i class="fab fa-whatsapp text-xs"></i>
-  </button>
-</div>
+<!-- Mobile: iconos compactos -->
+<button onclick="copyPublicLink()" class="md:hidden btn btn-xs btn-ghost px-1" style="color:#059669;">
+  <i class="fas fa-link"></i>
+</button>
+<button type="button" onclick="shareWhatsapp()" class="md:hidden btn btn-xs btn-ghost px-1" style="color:#25D366;">
+  <i class="fab fa-whatsapp"></i>
+</button>
 {% endif %}
 
 <!-- Toggle público -->
 <form method="POST" action="{{ url_for('shows.toggle_public', show_id=show.id) }}" class="inline">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-  <button type="submit"
-          class="btn btn-sm gap-1 {% if show.is_public %}btn-success{% else %}btn-ghost border-gray-300 text-gray-700{% endif %}">
+  <button type="submit" class="btn btn-xs md:btn-sm gap-0.5 {% if show.is_public %}btn-success{% else %}btn-ghost border-gray-300 text-gray-700{% endif %}">
     <i class="fas fa-{% if show.is_public %}globe{% else %}lock{% endif %}"></i>
-    <span class="hidden sm:inline">{% if show.is_public %}Público{% else %}Privado{% endif %}</span>
+    <span class="hidden md:inline">{% if show.is_public %}Público{% else %}Privado{% endif %}</span>
   </button>
 </form>
 
-<a href="{{ url_for('setlist.export_pdf', show_id=show.id) }}" class="btn btn-gold btn-sm gap-1">
-  <i class="fas fa-file-pdf"></i><span class="hidden sm:inline"> PDF</span>
+<a href="{{ url_for('setlist.export_pdf', show_id=show.id) }}" class="btn btn-xs md:btn-sm btn-gold gap-0.5">
+  <i class="fas fa-file-pdf"></i><span class="hidden md:inline"> PDF</span>
 </a>
-
-<a href="{{ url_for('shows.edit', show_id=show.id) }}?next={{ url_for('setlist.builder', show_id=show.id) }}" class="btn btn-ghost btn-sm text-gray-700">
+<a href="{{ url_for('shows.edit', show_id=show.id) }}?next={{ url_for('setlist.builder', show_id=show.id) }}" class="btn btn-xs md:btn-sm btn-ghost text-gray-700 px-1">
   <i class="fas fa-edit"></i>
 </a>
-<a href="{{ url_for('shows.index') }}" class="btn btn-ghost btn-sm text-gray-700">
+<a href="{{ url_for('shows.index') }}" class="btn btn-xs md:btn-sm btn-ghost text-gray-700 px-1">
   <i class="fas fa-arrow-left"></i>
 </a>
 {% endblock %}
@@ -270,10 +264,10 @@ var SONGS_DATA = {
 };
 </script>
 
-<div class="builder-bg flex gap-4 h-full" style="min-height: calc(100vh - 140px);">
+<div class="builder-bg flex gap-4 h-full md:min-h-[calc(100vh-140px)]" id="builder-container">
 
-  <!-- ===== PANEL IZQUIERDO: CATÁLOGO ===== -->
-  <div class="w-80 flex-shrink-0 flex flex-col" style="max-height: calc(100vh - 90px); position: sticky; top: 80px;">
+  <!-- ===== PANEL IZQUIERDO: CATÁLOGO (desktop: sidebar, mobile: hidden → bottom sheet) ===== -->
+  <div class="w-80 flex-shrink-0 hidden md:flex flex-col catalog-panel" style="max-height: calc(100vh - 90px); position: sticky; top: 80px;">
     <div class="marifa-card flex flex-col h-full overflow-hidden">
 
       <div class="p-4 border-b border-gray-800">
@@ -326,6 +320,82 @@ var SONGS_DATA = {
     </div>
   </div>
 
+  <!-- ===== MOBILE: botón agregar (sticky arriba del setlist) ===== -->
+  <div class="md:hidden mb-2">
+    <button id="mobile-catalog-fab" onclick="openMobileCatalog()"
+            class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl shadow-sm"
+            style="background: linear-gradient(135deg, #7c3aed, #f43f5e);
+                   color: white; border: none; cursor: pointer;">
+      <i class="fas fa-plus text-sm"></i>
+      <span class="text-sm font-bold">Agregar canción</span>
+    </button>
+  </div>
+
+  <!-- ===== MOBILE: Bottom sheet catálogo ===== -->
+  <div id="mobile-catalog-sheet" class="md:hidden fixed inset-0 z-40" style="display:none;" onclick="if(event.target===this) closeMobileCatalog()">
+    <div style="position:absolute; inset:0; background:rgba(0,0,0,0.5);"></div>
+    <div id="mobile-catalog-panel" style="position:absolute; bottom:0; left:0; right:0;
+         background:white; border-radius:20px 20px 0 0;
+         max-height:80vh; display:flex; flex-direction:column;
+         transform:translateY(100%); transition:transform 0.3s ease;
+         box-shadow:0 -8px 32px rgba(0,0,0,0.2);">
+      <!-- Handle -->
+      <div style="padding:8px 0; text-align:center;">
+        <div style="width:40px; height:4px; background:#d1d5db; border-radius:2px; margin:0 auto;"></div>
+      </div>
+      <!-- Header -->
+      <div class="flex items-center justify-between px-4 pb-2">
+        <h3 class="font-serif text-base font-bold" style="color:#1e1b2e;">
+          <i class="fas fa-music text-violet-600 mr-1"></i> Catálogo
+        </h3>
+        <button onclick="closeMobileCatalog()" style="background:none; border:none; cursor:pointer; color:#9ca3af; font-size:1.1rem;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <!-- Search -->
+      <div class="px-4 pb-2">
+        <div class="relative mb-2">
+          <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm"></i>
+          <input type="text" id="mobile-catalog-search"
+                 class="marifa-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
+                 placeholder="Buscar canción..." autocomplete="off"
+                 oninput="document.getElementById('catalog-search').value=this.value; document.getElementById('catalog-search').dispatchEvent(new Event('input'));" />
+        </div>
+        <div class="flex gap-2">
+          <select id="mobile-catalog-genre" class="marifa-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
+                  onchange="document.getElementById('catalog-genre').value=this.value; document.getElementById('catalog-genre').dispatchEvent(new Event('change'));">
+            <option value="">Todos los géneros</option>
+            {% for g in genres %}
+            <option value="{{ g }}">{{ g }}</option>
+            {% endfor %}
+          </select>
+          <select id="mobile-catalog-sort" class="marifa-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
+                  onchange="document.getElementById('catalog-sort').value=this.value; document.getElementById('catalog-sort').dispatchEvent(new Event('change'));">
+            <option value="title">A–Z Título</option>
+            <option value="artist">A–Z Artista</option>
+            <option value="genre">Por género</option>
+            <option value="updated" selected>Más recientes</option>
+          </select>
+        </div>
+      </div>
+      <!-- Results (mirror of catalog-results) -->
+      <div id="mobile-catalog-results" class="flex-1 overflow-y-auto px-4 pb-2">
+        <div class="text-center py-4"><div class="loading-spinner mx-auto"></div></div>
+      </div>
+      <!-- Footer -->
+      <div class="flex gap-2 px-4 py-3" style="border-top:1px solid #e5e7eb;">
+        <button onclick="addBreak({{ show.id }}); closeMobileCatalog();"
+                class="btn btn-ghost btn-sm flex-1 gap-1 text-xs"
+                style="color:#d97706; border:1px dashed #fcd34d;">
+          <i class="fas fa-pause-circle"></i> Intermedio
+        </button>
+        <a href="{{ url_for('songs.new') }}?next={{ url_for('setlist.builder', show_id=show.id) }}" class="btn btn-ghost btn-sm flex-1 text-gray-600 gap-1 text-xs">
+          <i class="fas fa-plus-circle text-violet-600"></i> Nueva
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- ===== PANEL DERECHO: SETLIST ===== -->
   <div class="flex-1 flex flex-col">
 
@@ -371,7 +441,7 @@ var SONGS_DATA = {
           {% else %}
           <!-- CANCIÓN — tarjeta -->
           {% set song_count.n = song_count.n + 1 %}
-          <div class="bg-white rounded-2xl border border-gray-100 mb-3 overflow-hidden slide-in"
+          <div class="bg-white rounded-xl md:rounded-2xl border border-gray-100 mb-2 md:mb-3 overflow-hidden slide-in"
                style="cursor:pointer; box-shadow:0 2px 12px rgba(0,0,0,0.06); transition: box-shadow 0.2s, transform 0.2s;"
                data-item-id="{{ item.id }}"
                data-song-id="{{ item.song_id }}"
@@ -379,13 +449,13 @@ var SONGS_DATA = {
                onmouseover="this.style.boxShadow='0 6px 24px rgba(244,63,94,0.12)'; this.style.transform='translateY(-1px)';"
                onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.06)'; this.style.transform='';">
 
-            <div class="flex items-stretch">
+            <!-- Desktop: layout original con columnas -->
+            <div class="hidden md:flex items-stretch">
               <!-- Número lateral -->
               <div class="flex items-center justify-center px-4 flex-shrink-0"
                    style="background: linear-gradient(180deg, #fdf8f5 0%, #f9f3ee 100%); border-right: 1px solid #f0e8f5; min-width:60px;">
                 <span class="setlist-number">{{ song_count.n }}</span>
               </div>
-
               <!-- Contenido principal -->
               <div class="flex-1 min-w-0 p-4">
                 <div class="flex items-start justify-between gap-2 mb-1">
@@ -427,7 +497,6 @@ var SONGS_DATA = {
                     onblur="saveNotes({{ show.id }}, {{ item.id }})">{{ item.notes_override or '' }}</textarea>
                 </div>
               </div>
-
               <!-- Acciones laterales -->
               <div class="flex flex-col items-center justify-center gap-1 px-2 flex-shrink-0"
                    style="border-left: 1px solid #f0e8f5; background:#fdf8f5;">
@@ -446,6 +515,65 @@ var SONGS_DATA = {
                   <i class="fas fa-times"></i>
                 </button>
               </div>
+            </div>
+
+            <!-- Mobile: layout compacto -->
+            <div class="flex md:hidden flex-col">
+              <div class="flex items-center gap-2.5 px-3 py-2.5">
+                <!-- Número pequeño -->
+                <span class="setlist-number flex-shrink-0" style="font-size:1.3rem; min-width:24px; opacity:0.35;">{{ song_count.n }}</span>
+                <!-- Info -->
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center gap-2">
+                    <p class="font-serif font-bold leading-tight truncate" style="font-size:0.95rem; color:#1e1b2e;">
+                      {{ item.song.title }}
+                    </p>
+                    {% if item.song.key %}
+                    <span class="flex-shrink-0 font-bold px-1.5 py-0.5 rounded-full"
+                          style="font-size:0.65rem; background:#fffbeb; color:#d97706; border:1px solid #fde68a;">
+                      {{ item.song.key }}
+                    </span>
+                    {% endif %}
+                  </div>
+                  <p class="text-xs truncate" style="color:#6b7280;">{{ item.song.original_artist or '' }}</p>
+                </div>
+                <!-- Acciones inline -->
+                <div class="flex items-center gap-0 flex-shrink-0">
+                  {% if item.song.youtube_url %}
+                  <button onclick="event.stopPropagation(); openYtPlayer({{ item.song.youtube_embed_url|tojson }}, {{ item.song.title|tojson }})"
+                          class="btn btn-xs btn-ghost px-1" style="color:#ff0000;">
+                    <i class="fab fa-youtube text-xs"></i>
+                  </button>
+                  {% endif %}
+                  <button onclick="event.stopPropagation(); toggleNotes({{ item.id }})"
+                          class="btn btn-xs btn-ghost px-1 text-gray-400">
+                    <i class="fas fa-sticky-note text-xs"></i>
+                  </button>
+                  <button onclick="event.stopPropagation(); removeItem({{ show.id }}, {{ item.id }})"
+                          class="btn btn-xs btn-ghost px-1 text-gray-400">
+                    <i class="fas fa-times text-xs"></i>
+                  </button>
+                </div>
+              </div>
+              <!-- Meta tags + notas (si hay) -->
+              <div class="flex items-center gap-1.5 flex-wrap px-3 pb-2" style="padding-left: calc(24px + 0.75rem + 0.625rem);">
+                <span class="genre-badge badge {{ item.song.genre_badge }}" style="font-size:0.6rem; padding:1px 6px;">
+                  {{ item.song.genre_emoji }} {{ item.song.genre }}
+                </span>
+                {% if item.song.bpm %}
+                <span style="font-size:0.6rem; color:#9ca3af;">{{ item.song.bpm }} BPM</span>
+                {% endif %}
+                {% if item.song.duration_sec %}
+                <span style="font-size:0.6rem; color:#9ca3af;">⏱ {{ item.song.duration_display }}</span>
+                {% endif %}
+              </div>
+              {% set display_notes_m = item.notes_override or item.song.musician_notes %}
+              {% if display_notes_m %}
+              <div class="mx-3 mb-2 px-2 py-1.5 rounded-lg text-xs italic"
+                   style="background:#fffbeb; border-left:3px solid #fcd34d; color:#92400e;">
+                <i class="fas fa-sticky-note mr-1"></i>{{ display_notes_m }}
+              </div>
+              {% endif %}
             </div>
 
           </div>
@@ -892,6 +1020,64 @@ var SONGS_DATA = {
 {% block extra_scripts %}
 <script>
   window.SHOW_ID = {{ show.id }};
+
+  // ── Mobile bottom sheet catálogo ──
+  function openMobileCatalog() {
+    var sheet = document.getElementById('mobile-catalog-sheet');
+    var panel = document.getElementById('mobile-catalog-panel');
+    sheet.style.display = 'block';
+    requestAnimationFrame(function() {
+      panel.style.transform = 'translateY(0)';
+    });
+    // Sync results to mobile
+    syncMobileCatalog();
+  }
+
+  function closeMobileCatalog() {
+    var sheet = document.getElementById('mobile-catalog-sheet');
+    var panel = document.getElementById('mobile-catalog-panel');
+    panel.style.transform = 'translateY(100%)';
+    setTimeout(function() { sheet.style.display = 'none'; }, 300);
+  }
+
+  function syncMobileCatalog() {
+    var src = document.getElementById('catalog-results');
+    var dst = document.getElementById('mobile-catalog-results');
+    if (src && dst) dst.innerHTML = src.innerHTML;
+  }
+
+  // Observe changes in catalog-results and mirror to mobile
+  var _catalogObserver = new MutationObserver(function() { syncMobileCatalog(); });
+  document.addEventListener('DOMContentLoaded', function() {
+    var el = document.getElementById('catalog-results');
+    if (el) _catalogObserver.observe(el, { childList: true, subtree: true });
+  });
+
+  // Override renderSongCard para mobile
+  var _origRenderSongCard = (typeof renderSongCard === 'function') ? renderSongCard : null;
+  renderSongCard = function(song) {
+    if (typeof addedSongIds !== 'undefined' && addedSongIds.has(song.id)) return '';
+
+    var esc = typeof escapeHtml === 'function' ? escapeHtml : function(s){return s||'';};
+    var key = song.key ? '<span style="color:#d97706;font-size:0.75rem;font-weight:700;">'+esc(song.key)+'</span>' : '';
+    var bpm = song.bpm ? '<span style="color:#6b7280;font-size:0.7rem;">'+song.bpm+' BPM</span>' : '';
+    var dur = (song.duration_display && song.duration_display !== '--:--') ? '<span style="color:#6b7280;font-size:0.7rem;">⏱ '+song.duration_display+'</span>' : '';
+
+    return '<div class="catalog-song mb-1.5 slide-in" id="catalog-song-'+song.id+'" data-song-id="'+song.id+'" style="cursor:grab;padding:10px 12px;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+      +   '<div style="flex:1;min-width:0;">'
+      +     '<p style="font-weight:700;font-size:0.9rem;color:#1e1b2e;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+esc(song.title)+'</p>'
+      +     '<p style="font-size:0.75rem;color:#4b5563;margin:0;">'+esc(song.original_artist)+'</p>'
+      +     '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-top:3px;">'
+      +       '<span class="genre-badge badge '+esc(song.genre_badge)+'" style="font-size:0.6rem;padding:1px 6px;">'+(song.genre_emoji||'')+' '+esc(song.genre)+'</span>'
+      +       key + bpm + dur
+      +     '</div>'
+      +   '</div>'
+      +   '<button onclick="event.stopPropagation();addSongToSetlist('+song.id+',this)" class="btn btn-sm btn-marifa flex-shrink-0" style="min-width:36px;min-height:36px;padding:4px;font-size:1rem;" title="Agregar"><i class="fas fa-plus"></i></button>'
+      + '</div>'
+      + '</div>';
+  };
+
   document.addEventListener('DOMContentLoaded', function() {
     initSortable({{ show.id }});
     initCatalog({{ show.id }});

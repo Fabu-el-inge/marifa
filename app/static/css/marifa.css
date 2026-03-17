@@ -560,24 +560,17 @@ select.marifa-input {
     width: 100%;
   }
 
-  /* Builder: stack vertical instead of side-by-side */
+  /* Builder: vertical stack, no min-height */
   .builder-bg {
     flex-direction: column !important;
+    min-height: auto !important;
     gap: 0 !important;
   }
-  .builder-bg > .w-80 {
-    width: 100% !important;
-    max-height: none !important;
-    position: static !important;
-  }
-  .builder-bg > .w-80 > .marifa-card {
-    max-height: 50vh;
-  }
 
-  /* Setlist number smaller on mobile */
-  .setlist-number {
-    font-size: 1.6rem;
-    min-width: 36px;
+  /* Setlist card: compact padding */
+  .builder-bg > .flex-1 > .marifa-card {
+    padding: 0.5rem !important;
+    border-radius: 14px;
   }
 
   /* Cards: full width */
@@ -599,6 +592,11 @@ select.marifa-input {
     padding: 0.25rem;
     min-height: auto;
     height: auto;
+  }
+
+  /* Topbar actions: scrollable without visible scrollbar */
+  .topbar-actions::-webkit-scrollbar {
+    display: none;
   }
 }
 
