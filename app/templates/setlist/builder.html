@@ -942,7 +942,7 @@ var SONGS_DATA = {
 
     var notesEl = document.getElementById('modal-notes');
     if (s.notes && s.notes.trim()) {
-      notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${s.notes}</p>`;
+      notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${escHtmlB(s.notes)}</p>`;
       notesEl.style.display = 'block';
     } else { notesEl.style.display = 'none'; }
 

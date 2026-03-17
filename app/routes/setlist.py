@@ -151,7 +151,7 @@ def export_pdf(show_id):
         pisa.CreatePDF(html.encode('utf-8'), dest=pdf_buffer, encoding='utf-8')
         pdf_buffer.seek(0)
 
-        filename = f"Aria_{show.name.replace(' ', '_')}_{show.date.strftime('%Y%m%d')}.pdf"
+        filename = f"MariFa_{show.name.replace(' ', '_')}_{show.date.strftime('%Y%m%d')}.pdf"
         return send_file(pdf_buffer, as_attachment=True, download_name=filename,
                          mimetype='application/pdf')
     except Exception as e:

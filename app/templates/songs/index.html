@@ -79,7 +79,7 @@
       <div id="modal-lyrics" class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-mono"></div>
       <div id="modal-notes" class="mt-4 p-3 rounded-xl" style="background:#fdf4ff;"></div>
       <!-- Panel de grabación rápida -->
-      <div id="modal-rec-panel" style="display:none;" class="mt-4 p-3 rounded-xl" style="background:#fff5f5; border:1px solid #fecaca;">
+      <div id="modal-rec-panel" style="display:none;" class="mt-4">
         <div style="background:#fff5f5; border:1px solid #fecaca; border-radius:0.75rem; padding:0.75rem;">
           <div class="flex items-center justify-between mb-2">
             <p class="text-xs font-bold text-red-600"><i class="fas fa-microphone mr-1"></i>Grabación de referencia</p>
@@ -497,7 +497,7 @@ function openLyricsModal(id) {
   // Notas para músicos
   const notesEl = document.getElementById('modal-notes');
   if (s.notes && s.notes.trim()) {
-    notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${s.notes}</p>`;
+    notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${escHtml(s.notes)}</p>`;
     notesEl.style.display = 'block';
   } else {
     notesEl.style.display = 'none';
