@@ -109,9 +109,11 @@ function closeConfirmModal() {
 }
 
 function confirmDeleteAction() {
+  var showId = _pendingRemoveShowId;
+  var itemId = _pendingRemoveItemId;
   closeConfirmModal();
-  if (_pendingRemoveShowId !== null && _pendingRemoveItemId !== null) {
-    _doRemoveItem(_pendingRemoveShowId, _pendingRemoveItemId);
+  if (showId !== null && itemId !== null) {
+    _doRemoveItem(showId, itemId);
   }
 }
 
