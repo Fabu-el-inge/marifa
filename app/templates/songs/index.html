@@ -29,6 +29,123 @@
   </div>
 </div>
 
+<!-- Modal de Letra -->
+<div id="lyrics-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.5); display:none;"
+     onclick="if(event.target===this) closeLyricsModal()">
+  <div id="lyrics-modal-box" class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden" style="transition: max-width 0.25s ease, max-height 0.25s ease;">
+    <!-- Header modal -->
+    <div class="flex items-start justify-between p-5 border-b border-gray-100">
+      <div class="flex-1 pr-3">
+        <h3 id="modal-title" class="font-serif text-xl font-bold" style="color:#1e1b2e;"></h3>
+        <p id="modal-artist" class="text-sm text-gray-500 mt-0.5"></p>
+        <div class="flex items-center gap-3 mt-1 flex-wrap" id="modal-meta"></div>
+      </div>
+      <div class="flex items-center gap-1 flex-shrink-0">
+        <a id="modal-print-btn" href="#" target="_blank"
+           class="btn btn-xs btn-ghost text-gray-500 hover:text-violet-600" title="Imprimir / descargar letra">
+          <i class="fas fa-print text-xs"></i>
+        </a>
+        <button id="modal-rec-btn" onclick="toggleModalRec()"
+                class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-red-500"
+                title="Grabar referencia de voz">
+          <i class="fas fa-microphone text-xs"></i>
+        </button>
+        <button id="modal-chord-lang-btn" onclick="toggleChordLang()"
+                class="btn btn-ghost btn-sm text-gray-400 hover:text-amber-600 font-bold text-xs"
+                title="Cambiar notación de acordes (Do/C)" style="min-width:2rem;">
+          Do
+        </button>
+        <button id="modal-expand-btn" onclick="toggleExpandLyrics()" class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-violet-600" title="Expandir / dos columnas">
+          <i class="fas fa-expand text-xs"></i>
+        </button>
+        <button onclick="closeLyricsModal()" class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <!-- Contenido -->
+    <div class="flex-1 overflow-y-auto p-5">
+      <div id="modal-lyrics" class="text-sm text-gray-700 whitespace-pre-wrap leading-relaxed font-mono"></div>
+      <div id="modal-notes" class="mt-4 p-3 rounded-xl" style="background:#fdf4ff;"></div>
+      <!-- Panel de grabación rápida -->
+      <div id="modal-rec-panel" style="display:none;" class="mt-4 p-3 rounded-xl" style="background:#fff5f5; border:1px solid #fecaca;">
+        <div style="background:#fff5f5; border:1px solid #fecaca; border-radius:0.75rem; padding:0.75rem;">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-xs font-bold text-red-600"><i class="fas fa-microphone mr-1"></i>Grabación de referencia</p>
+            <span id="modal-rec-timer" class="text-xs font-mono text-red-500" style="display:none;">0:00</span>
+          </div>
+          <!-- Audio existente -->
+          <div id="modal-rec-existing" style="display:none;" class="mb-2">
+            <audio id="modal-rec-existing-audio" controls class="w-full" style="height:32px;"></audio>
+            <button onclick="deleteModalRecording()" class="text-xs text-red-400 hover:text-red-600 mt-1">
+              <i class="fas fa-trash mr-1"></i>Eliminar
+            </button>
+          </div>
+          <!-- Nueva grabación -->
+          <div id="modal-rec-new" style="display:none;" class="mb-2">
+            <audio id="modal-rec-new-audio" controls class="w-full" style="height:32px;"></audio>
+            <div class="flex items-center gap-3 mt-1">
+              <button onclick="saveModalRecording()" class="text-xs font-bold text-green-600 hover:text-green-800">
+                <i class="fas fa-save mr-1"></i>Guardar
+              </button>
+              <button onclick="discardModalRec()" class="text-xs text-gray-400 hover:text-red-400">
+                <i class="fas fa-undo mr-1"></i>Descartar
+              </button>
+            </div>
+          </div>
+          <!-- Botón grabar -->
+          <div class="flex items-center gap-3">
+            <button id="modal-rec-toggle" onclick="toggleModalRecording()"
+                    class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
+                    style="background:#ef4444; color:white; border:none; box-shadow:0 3px 10px rgba(239,68,68,0.4); cursor:pointer;">
+              <i id="modal-rec-icon" class="fas fa-microphone"></i>
+            </button>
+            <p id="modal-rec-hint" class="text-xs text-gray-500">Toca para grabar tu referencia</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Audio YouTube -->
+      <div id="modal-yt-audio" class="mt-4 p-3 rounded-xl" style="background:#fff1f2; border:1px solid #fecdd3; display:none;">
+        <p class="text-xs font-bold mb-2" style="color:#e11d48;">
+          <i class="fab fa-youtube mr-1"></i>Audio de referencia (YouTube)
+        </p>
+        <!-- Botón para cargar el player (evita autoplay) -->
+        <button id="modal-yt-play-btn" onclick="loadYtAudio()"
+                class="w-full flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-semibold text-white"
+                style="background:#e11d48;">
+          <i class="fab fa-youtube"></i> Escuchar
+        </button>
+        <!-- El iframe se carga solo cuando el usuario hace clic -->
+        <div id="modal-yt-player" style="display:none; position:relative; height:52px; border-radius:6px; overflow:hidden; background:#000; margin-top:6px;">
+          <iframe id="modal-yt-iframe" src="" frameborder="0"
+                  allow="autoplay; encrypted-media"
+                  style="position:absolute; bottom:0; left:0; width:100%; height:220px; border:none;"></iframe>
+        </div>
+      </div>
+      <!-- Grabación de referencia -->
+      <div id="modal-recording" class="mt-4 p-3 rounded-xl" style="background:#fdf4ff; border:1px solid #e9d5ff; display:none;">
+        <p class="text-xs font-bold text-violet-700 mb-2">
+          <i class="fas fa-microphone mr-1"></i>Grabación de referencia
+        </p>
+        <audio id="modal-audio" controls class="w-full" style="height:36px;"></audio>
+        <button id="modal-audio-download" onclick="downloadRecording()" class="inline-flex items-center gap-1 text-xs text-violet-600 hover:text-violet-800 mt-2 bg-transparent border-none cursor-pointer">
+          <i class="fas fa-download"></i> Descargar audio
+        </button>
+      </div>
+      <div id="modal-no-lyrics" class="text-center py-8 text-gray-400" style="display:none;">
+        <i class="fas fa-music text-2xl mb-2 block opacity-30"></i>
+        Esta canción no tiene letra cargada.
+        <br>
+        <a id="modal-edit-link" href="#" class="text-violet-600 text-sm hover:underline mt-2 inline-block">
+          <i class="fas fa-edit mr-1"></i>Agregar letra
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="max-w-5xl mx-auto">
 
   <!-- FILTROS -->
@@ -79,6 +196,27 @@
     </div>
   </form>
 
+  <!-- Datos de canciones para el modal (safe JSON) -->
+  <script>
+  var SONGS_DATA = {
+    {% for song in songs %}
+    {{ song.id }}: {
+      title:    {{ song.title|tojson }},
+      artist:   {{ (song.original_artist or '')|tojson }},
+      lyrics:   {{ (song.lyrics or '')|tojson }},
+      notes:    {{ (song.musician_notes or '')|tojson }},
+      key:      {{ (song.key or '')|tojson }},
+      bpm:      {{ song.bpm or 'null' }},
+      duration: {{ (song.duration_display or '')|tojson }},
+      genre:      {{ (song.genre_emoji ~ ' ' ~ song.genre)|tojson }},
+      editUrl:    {{ url_for('songs.edit', song_id=song.id)|tojson }},
+      youtubeEmbed:   {{ (song.youtube_embed_url or '')|tojson }},
+      recordingUrl:   {{ (song.recording_url or '')|tojson }},
+      printUrl:       {{ url_for('songs.print_song', song_id=song.id)|tojson }}
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  };
+  </script>
 
   <!-- CANCIONES -->
   {% if songs %}
@@ -87,7 +225,7 @@
     <div class="catalog-song p-4 fade-in"
          data-song-id="{{ song.id }}"
          style="cursor:pointer;"
-         onclick="window.location='{{ url_for('songs.detail', song_id=song.id) }}'">
+         onclick="openLyricsModal({{ song.id }})">
       <div class="flex items-start justify-between gap-3">
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap mb-1">
@@ -186,6 +324,393 @@
 {% block extra_scripts %}
 <script>
 var CSRF = document.querySelector('meta[name="csrf-token"]').content;
+const _NOTE_ES = { 'C':'Do','D':'Re','E':'Mi','F':'Fa','G':'Sol','A':'La','B':'Si' };
+const _NOTE_EN = { 'Do':'C','Re':'D','Mi':'E','Fa':'F','Sol':'G','La':'A','Si':'B' };
+
+function chordToSpanish(chord) {
+  return chord.replace(/^([A-G])(#|b)?/, function(_, n, acc) {
+    return _NOTE_ES[n] + (acc || '');
+  });
+}
+function chordToEnglish(chord) {
+  return chord.replace(/^(Do|Re|Mi|Fa|Sol|La|Si)(#|b)?/, function(_, n, acc) {
+    return _NOTE_EN[n] + (acc || '');
+  });
+}
+function convertLyrics(text, fn) {
+  return text.replace(/\[([^\]]+)\]/g, function(_, c) { return '[' + fn(c) + ']'; });
+}
+
+// Detecta si una línea es SOLO acordes (sin letra)
+function _isChordLine(line) {
+  var s = line.trim();
+  if (!s) return false;
+  // Quitar todo lo que parece acorde anglosajón o latino, y espacios
+  var without = s.replace(/\b(Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?\b/g, '');
+  return !without.trim();
+}
+
+// Convierte formato "acordes arriba / letra abajo" a formato inline [Acorde]
+function chordsAboveToInline(text) {
+  if (!text) return text;
+  // Si ya tiene formato inline [acordes], devolver tal cual
+  if (/\[(?:[A-G]|Do|Re|Mi|Fa|Sol|La|Si)[#b]?(?:m|maj|dim|aug|sus)?\]/.test(text)) return text;
+
+  var lines = text.split('\n');
+  var result = [];
+  var i = 0;
+  while (i < lines.length) {
+    if (_isChordLine(lines[i]) && i + 1 < lines.length && !_isChordLine(lines[i + 1]) && lines[i + 1].trim()) {
+      // Línea de acordes + línea de letra: fusionar
+      var chordLine = lines[i];
+      var lyricLine = lines[i + 1];
+      // Encontrar posiciones de cada acorde
+      var chordRegex = /\b((?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?)\b/g;
+      var chords = [];
+      var m;
+      while ((m = chordRegex.exec(chordLine)) !== null) {
+        chords.push({ pos: m.index, name: m[1] });
+      }
+      // Insertar acordes en la letra según posición
+      var merged = '';
+      var lastPos = 0;
+      chords.forEach(function(c) {
+        var pos = Math.min(c.pos, lyricLine.length);
+        merged += lyricLine.substring(lastPos, pos) + '[' + c.name + ']';
+        lastPos = pos;
+      });
+      merged += lyricLine.substring(lastPos);
+      result.push(merged);
+      i += 2;
+    } else if (_isChordLine(lines[i])) {
+      // Línea de solo acordes sin letra después (intro, etc): poner como inline
+      var chordRegex2 = /\b((?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?(?:m|maj|dim|aug|sus[24]?|add\d+)?[0-9]?(?:\/(?:Do|Re|Mi|Fa|Sol|La|Si|[A-G])[#b]?)?)\b/g;
+      var solo = lines[i].replace(chordRegex2, '[$1]').trim();
+      result.push(solo);
+      i++;
+    } else {
+      result.push(lines[i]);
+      i++;
+    }
+  }
+  return result.join('\n');
+}
+
+let _chordsInSpanish = false;
+let _currentLyrics   = '';
+
+function toggleChordLang() {
+  _chordsInSpanish = !_chordsInSpanish;
+  const btn = document.getElementById('modal-chord-lang-btn');
+  btn.textContent = _chordsInSpanish ? 'C' : 'Do';
+  btn.style.color = _chordsInSpanish ? '#d97706' : '';
+  const text = _chordsInSpanish ? convertLyrics(_currentLyrics, chordToSpanish) : _currentLyrics;
+  document.getElementById('modal-lyrics').innerHTML = renderLyricsWithChords(text);
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderLyricsWithChords(text) {
+  if (!text) return '';
+  if (!text.includes('[')) {
+    return '<span style="white-space:pre-wrap;">' + escHtml(text) + '</span>';
+  }
+  return text.split('\n').map(function(line) {
+    if (!line.includes('[')) {
+      return '<div class="chord-line"><span class="chord-seg"><span class="chord-name">\u00a0</span><span class="chord-lyric">' + escHtml(line || '\u00a0') + '</span></span></div>';
+    }
+    var parts   = line.split(/(\[[^\]]+\])/);
+    var pending = '';
+    var html    = '<div class="chord-line">';
+    parts.forEach(function(p) {
+      if (/^\[[^\]]+\]$/.test(p)) {
+        pending = p.slice(1, -1);
+      } else {
+        html += '<span class="chord-seg"><span class="chord-name">' + escHtml(pending || '\u00a0') + '</span><span class="chord-lyric">' + escHtml(p || '\u00a0') + '</span></span>';
+        pending = '';
+      }
+    });
+    if (pending) html += '<span class="chord-seg"><span class="chord-name">' + escHtml(pending) + '</span><span class="chord-lyric">\u00a0</span></span>';
+    return html + '</div>';
+  }).join('');
+}
+
+function openLyricsModal(id) {
+  const s = SONGS_DATA[id];
+  if (!s) return;
+
+  document.getElementById('modal-title').textContent = s.title;
+  document.getElementById('modal-artist').textContent = s.artist || '—';
+
+  // Meta chips
+  const metaEl = document.getElementById('modal-meta');
+  let metaHtml = '';
+  if (s.genre)    metaHtml += `<span class="text-xs px-2 py-0.5 rounded-full" style="background:#ede9fe;color:#5b21b6;">${s.genre}</span>`;
+  if (s.key)      metaHtml += `<span class="text-xs font-bold" style="color:#d97706;"><i class="fas fa-key mr-1"></i>${s.key}</span>`;
+  if (s.bpm)      metaHtml += `<span class="text-xs text-gray-500">${s.bpm} BPM</span>`;
+  if (s.duration) metaHtml += `<span class="text-xs text-gray-500"><i class="fas fa-clock mr-1"></i>${s.duration}</span>`;
+  metaEl.innerHTML = metaHtml;
+
+  // Guardar song ID para grabación
+  _modalSongId = id;
+  _modalBlob   = null;
+  document.getElementById('modal-rec-panel').style.display = 'none';
+  document.getElementById('modal-rec-new').style.display   = 'none';
+  document.getElementById('modal-rec-hint').textContent    = 'Toca para grabar tu referencia.';
+  document.getElementById('modal-rec-timer').style.display = 'none';
+  document.getElementById('modal-rec-toggle').style.background = '#ef4444';
+  document.getElementById('modal-rec-icon').className = 'fas fa-microphone';
+  if (s.recordingUrl) {
+    document.getElementById('modal-rec-existing-audio').src = s.recordingUrl;
+    document.getElementById('modal-rec-existing').style.display = 'block';
+    document.getElementById('modal-rec-toggle').style.display = 'none';
+    document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
+  } else {
+    document.getElementById('modal-rec-existing-audio').src = '';
+    document.getElementById('modal-rec-existing').style.display = 'none';
+    document.getElementById('modal-rec-toggle').style.display = 'flex';
+    document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+  }
+
+  // Resetear notación de acordes al abrir
+  _chordsInSpanish = false;
+  _currentLyrics   = chordsAboveToInline(s.lyrics || '');
+  const chordBtn = document.getElementById('modal-chord-lang-btn');
+  chordBtn.textContent = 'Do';
+  chordBtn.style.color = '';
+
+  // Letra
+  const lyricsEl   = document.getElementById('modal-lyrics');
+  const noLyricsEl = document.getElementById('modal-no-lyrics');
+  if (s.lyrics && s.lyrics.trim()) {
+    lyricsEl.innerHTML = renderLyricsWithChords(_currentLyrics);
+    lyricsEl.style.display = 'block';
+    noLyricsEl.style.display = 'none';
+  } else {
+    lyricsEl.style.display = 'none';
+    noLyricsEl.style.display = 'block';
+    document.getElementById('modal-edit-link').href = s.editUrl;
+  }
+
+  // Notas para músicos
+  const notesEl = document.getElementById('modal-notes');
+  if (s.notes && s.notes.trim()) {
+    notesEl.innerHTML = `<p class="text-xs font-bold text-violet-700 mb-1"><i class="fas fa-sticky-note mr-1"></i>Notas para músicos</p><p class="text-sm text-gray-700">${s.notes}</p>`;
+    notesEl.style.display = 'block';
+  } else {
+    notesEl.style.display = 'none';
+  }
+
+  // Grabación de referencia
+  const recEl   = document.getElementById('modal-recording');
+  const audioEl = document.getElementById('modal-audio');
+  if (s.recordingUrl) {
+    audioEl.src = s.recordingUrl;
+    recEl.style.display = 'block';
+  } else {
+    audioEl.src = '';
+    recEl.style.display = 'none';
+  }
+
+  // Botón imprimir
+  const printBtn = document.getElementById('modal-print-btn');
+  if (printBtn && s.printUrl) printBtn.href = s.printUrl;
+
+  // Audio YouTube — solo guarda la URL, no carga hasta que el usuario haga clic
+  const ytAudioEl = document.getElementById('modal-yt-audio');
+  document.getElementById('modal-yt-iframe').src = '';
+  document.getElementById('modal-yt-player').style.display = 'none';
+  document.getElementById('modal-yt-play-btn').style.display = 'flex';
+  if (s.youtubeEmbed) {
+    _currentYtEmbed = s.youtubeEmbed;
+    ytAudioEl.style.display = 'block';
+  } else {
+    _currentYtEmbed = '';
+    ytAudioEl.style.display = 'none';
+  }
+
+  document.getElementById('lyrics-modal').style.display = 'flex';
+}
+
+// ── Grabación desde el modal ─────────────────────────────────────────────────
+let _modalSongId = null, _modalMr = null, _modalChunks = [], _modalTimerInt = null, _modalRecSecs = 0, _modalIsRec = false, _modalBlob = null;
+
+function toggleModalRec() {
+  const panel = document.getElementById('modal-rec-panel');
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function toggleModalRecording() {
+  if (_modalIsRec) {
+    if (_modalMr && _modalMr.state !== 'inactive') _modalMr.stop();
+    clearInterval(_modalTimerInt);
+  } else {
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
+      _modalChunks = [];
+      _modalMr = new MediaRecorder(stream);
+      _modalMr.ondataavailable = function(e) { if (e.data.size > 0) _modalChunks.push(e.data); };
+      _modalMr.onstop = function() {
+        stream.getTracks().forEach(function(t) { t.stop(); });
+        const mime = _modalMr.mimeType || 'audio/webm';
+        _modalBlob = new Blob(_modalChunks, { type: mime });
+        document.getElementById('modal-rec-new-audio').src = URL.createObjectURL(_modalBlob);
+        document.getElementById('modal-rec-new').style.display = 'block';
+        document.getElementById('modal-rec-hint').textContent = 'Escuchá y guardá si está bien.';
+        document.getElementById('modal-rec-timer').style.display = 'none';
+        _modalIsRec = false;
+        document.getElementById('modal-rec-toggle').style.background = '#ef4444';
+        document.getElementById('modal-rec-icon').className = 'fas fa-microphone';
+      };
+      _modalMr.start(100);
+      _modalIsRec = true; _modalRecSecs = 0;
+      document.getElementById('modal-rec-timer').textContent = '0:00';
+      document.getElementById('modal-rec-timer').style.display = 'inline';
+      document.getElementById('modal-rec-hint').textContent = 'Grabando... tocá para detener.';
+      document.getElementById('modal-rec-toggle').style.background = '#7f1d1d';
+      document.getElementById('modal-rec-icon').className = 'fas fa-stop';
+      _modalTimerInt = setInterval(function() {
+        _modalRecSecs++;
+        var m = Math.floor(_modalRecSecs/60), s = _modalRecSecs%60;
+        document.getElementById('modal-rec-timer').textContent = m+':'+(s<10?'0':'')+s;
+      }, 1000);
+    }).catch(function() { alert('No se pudo acceder al micrófono.'); });
+  }
+}
+
+function saveModalRecording() {
+  if (!_modalBlob || !_modalSongId) return;
+  var fd  = new FormData();
+  fd.append('recording', _modalBlob, 'rec.webm');
+  fetch('/songs/' + _modalSongId + '/save-recording', {
+    method: 'POST', headers: { 'X-CSRFToken': CSRF }, body: fd
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.ok) {
+      document.getElementById('modal-rec-existing-audio').src = d.url;
+      document.getElementById('modal-rec-existing').style.display = 'block';
+      document.getElementById('modal-rec-new').style.display = 'none';
+      document.getElementById('modal-rec-hint').textContent = 'Ya tenés una referencia grabada. Eliminala si querés grabar otra.';
+      document.getElementById('modal-rec-toggle').style.display = 'none';
+      // Actualizar reproductor principal y datos
+      document.getElementById('modal-audio').src = d.url;
+      document.getElementById('modal-recording').style.display = 'block';
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = d.url;
+      _modalBlob = null;
+    }
+  });
+}
+
+function discardModalRec() {
+  _modalBlob = null;
+  document.getElementById('modal-rec-new-audio').src = '';
+  document.getElementById('modal-rec-new').style.display = 'none';
+  document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+}
+
+function deleteModalRecording() {
+  if (!_modalSongId || !confirm('¿Eliminar la grabación?')) return;
+  fetch('/songs/' + _modalSongId + '/delete-recording', {
+    method: 'POST', headers: { 'X-CSRFToken': CSRF }
+  }).then(function(r) { return r.json(); }).then(function(d) {
+    if (d.ok) {
+      document.getElementById('modal-rec-existing-audio').src = '';
+      document.getElementById('modal-rec-existing').style.display = 'none';
+      document.getElementById('modal-rec-hint').textContent = 'Toca para grabar tu referencia.';
+      document.getElementById('modal-rec-toggle').style.display = 'flex';
+      document.getElementById('modal-audio').src = '';
+      document.getElementById('modal-recording').style.display = 'none';
+      if (SONGS_DATA[_modalSongId]) SONGS_DATA[_modalSongId].recordingUrl = '';
+    }
+  });
+}
+
+function closeLyricsModal() {
+  document.getElementById('lyrics-modal').style.display = 'none';
+  const a = document.getElementById('modal-audio');
+  a.pause();
+  a.src = '';
+  // Detener grabación si está activa
+  if (_modalIsRec && _modalMr && _modalMr.state !== 'inactive') { _modalMr.stop(); }
+  clearInterval(_modalTimerInt); _modalIsRec = false;
+  // Detener YouTube
+  document.getElementById('modal-yt-iframe').src = '';
+  document.getElementById('modal-yt-player').style.display = 'none';
+  document.getElementById('modal-yt-play-btn').style.display = 'flex';
+  document.getElementById('modal-yt-audio').style.display = 'none';
+  _currentYtEmbed = '';
+  // Resetear expansión al cerrar
+  _lyricsExpanded = false;
+  const box = document.getElementById('lyrics-modal-box');
+  box.style.maxWidth = '';
+  box.style.maxHeight = '';
+  box.classList.remove('max-w-5xl');
+  document.getElementById('modal-lyrics').style.columnCount = '';
+  document.getElementById('modal-lyrics').style.columnGap = '';
+  document.getElementById('modal-expand-btn').querySelector('i').className = 'fas fa-expand text-xs';
+}
+
+let _lyricsExpanded = false;
+
+function downloadRecording() {
+  var url = document.getElementById('modal-audio').src;
+  if (!url) return;
+  fetch(url)
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'grabacion.webm';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+}
+
+let _currentYtEmbed = '';
+
+function loadYtAudio() {
+  if (!_currentYtEmbed) return;
+  const sep = _currentYtEmbed.includes('?') ? '&' : '?';
+  document.getElementById('modal-yt-iframe').src = _currentYtEmbed + sep + 'autoplay=1&controls=1&modestbranding=1&rel=0';
+  document.getElementById('modal-yt-player').style.display = 'block';
+  document.getElementById('modal-yt-play-btn').style.display = 'none';
+}
+function toggleExpandLyrics() {
+  _lyricsExpanded = !_lyricsExpanded;
+  const box     = document.getElementById('lyrics-modal-box');
+  const lyrics  = document.getElementById('modal-lyrics');
+  const icon    = document.getElementById('modal-expand-btn').querySelector('i');
+  if (_lyricsExpanded) {
+    box.style.maxWidth  = '900px';
+    box.style.maxHeight = '95vh';
+    lyrics.style.columnCount = '2';
+    lyrics.style.columnGap   = '2.5rem';
+    icon.className = 'fas fa-compress text-xs';
+  } else {
+    box.style.maxWidth  = '';
+    box.style.maxHeight = '';
+    lyrics.style.columnCount = '';
+    lyrics.style.columnGap   = '';
+    icon.className = 'fas fa-expand text-xs';
+  }
+}
+
+function openYtModal(id) {
+  const s = SONGS_DATA[id];
+  if (!s || !s.youtubeEmbed) return;
+  document.getElementById('yt-modal-title').textContent = s.title;
+  document.getElementById('yt-iframe').src = s.youtubeEmbed;
+  document.getElementById('yt-modal').style.display = 'flex';
+}
+
+function closeYtModal() {
+  document.getElementById('yt-iframe').src = '';
+  document.getElementById('yt-modal').style.display = 'none';
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') { closeLyricsModal(); closeYtModal(); }
+});
 
 // ── Drag & drop para reordenar canciones ──
 (function() {
