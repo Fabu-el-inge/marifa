@@ -8,3 +8,4 @@ __pycache__/
 migrate_users.py
 seed.py
 nul
+audios/

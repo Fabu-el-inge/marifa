@@ -117,38 +117,77 @@ function renderCatalog(songs) {
 function renderSongCard(song) {
   // Si ya está en el setlist, no mostrar en catálogo
   if (addedSongIds.has(song.id)) return '';
+
+  const mob = window.innerWidth < 768;
+
   const notes = song.musician_notes
-    ? `<p class="text-xs text-gray-600 mt-1 truncate">${escapeHtml(song.musician_notes)}</p>`
+    ? `<p style="font-size:${mob ? '0.85rem' : '0.75rem'}; color:#4b5563; margin-top:4px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escapeHtml(song.musician_notes)}</p>`
     : '';
 
   const key = song.key
-    ? `<span class="text-yellow-400 text-xs font-bold">${escapeHtml(song.key)}</span>`
+    ? `<span style="color:#facc15; font-size:${mob ? '0.85rem' : '0.75rem'}; font-weight:700;">${escapeHtml(song.key)}</span>`
     : '';
   const bpm = song.bpm
-    ? `<span class="text-gray-600 text-xs">${song.bpm} BPM</span>`
+    ? `<span style="color:#6b7280; font-size:${mob ? '0.85rem' : '0.75rem'};">${song.bpm} BPM</span>`
     : '';
   const dur = song.duration_display && song.duration_display !== '--:--'
-    ? `<span class="text-gray-600 text-xs">⏱ ${song.duration_display}</span>`
+    ? `<span style="color:#6b7280; font-size:${mob ? '0.85rem' : '0.75rem'};">⏱ ${song.duration_display}</span>`
     : '';
+
+  const btnSize = mob ? 'min-width:40px; min-height:40px; font-size:1rem;' : 'min-width:28px; min-height:28px; font-size:0.75rem;';
 
   // Botón YouTube
   const ytBtn = song.youtube_embed_url
     ? `<button onclick="event.stopPropagation(); openYtPlayer('${escapeHtml(song.youtube_embed_url)}', '${escapeHtml(song.title)}')"
-               class="btn btn-xs btn-ghost flex-shrink-0" style="color:#ff0000; padding:2px 4px;"
+               class="btn btn-xs btn-ghost flex-shrink-0" style="color:#ff0000; ${btnSize} padding:4px;"
                title="Reproducir en YouTube">
-        <i class="fab fa-youtube text-xs"></i>
+        <i class="fab fa-youtube"></i>
       </button>`
     : '';
 
   // Botón grabación de referencia
   const recBtn = song.recording_url
     ? `<button onclick="event.stopPropagation(); openCatalogAudio('${escapeHtml(song.recording_url)}', '${escapeHtml(song.title)}')"
-               class="btn btn-xs btn-ghost flex-shrink-0" style="color:#7c3aed; padding:2px 4px;"
+               class="btn btn-xs btn-ghost flex-shrink-0" style="color:#7c3aed; ${btnSize} padding:4px;"
                title="Escuchar grabación de referencia">
-        <i class="fas fa-microphone text-xs"></i>
+        <i class="fas fa-microphone"></i>
       </button>`
     : '';
 
+  if (mob) {
+    // MOBILE: botones abajo en fila, texto usa todo el ancho
+    return `
+      <div class="catalog-song mb-2 slide-in"
+           id="catalog-song-${song.id}"
+           data-song-id="${song.id}"
+           style="cursor:grab; padding:12px 14px;"
+           title="Arrastrá para agregar al setlist">
+        <p style="font-weight:600; font-size:1.05rem; color:#1e1b2e; margin:0 0 2px 0;">${escapeHtml(song.title)}</p>
+        <p style="font-size:0.9rem; color:#4b5563; margin:0 0 6px 0;">${escapeHtml(song.original_artist)}</p>
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:6px;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; flex:1; min-width:0;">
+            <span class="genre-badge badge ${escapeHtml(song.genre_badge)}" style="font-size:0.78rem;">
+              ${song.genre_emoji} ${escapeHtml(song.genre)}
+            </span>
+            ${key}${bpm}${dur}
+          </div>
+          <div style="display:flex; align-items:center; gap:4px; flex-shrink:0;">
+            ${ytBtn}
+            ${recBtn}
+            <button onclick="addSongToSetlist(${song.id}, this)"
+                    class="btn btn-sm btn-marifa"
+                    title="Agregar al setlist"
+                    style="min-width:38px; min-height:38px; padding:4px;">
+              <i class="fas fa-plus"></i>
+            </button>
+          </div>
+        </div>
+        ${notes}
+      </div>
+    `;
+  }
+
+  // DESKTOP: layout original con botones a la derecha
   return `
     <div class="catalog-song p-3 mb-2 slide-in"
          id="catalog-song-${song.id}"
@@ -167,15 +206,11 @@ function renderSongCard(song) {
           </div>
           ${notes}
         </div>
-        <!-- Acciones -->
         <div class="flex flex-col items-center gap-1 flex-shrink-0">
           ${ytBtn}
           ${recBtn}
-          <button
-            onclick="addSongToSetlist(${song.id}, this)"
-            class="btn btn-sm btn-marifa gap-1"
-            title="Agregar al setlist"
-          >
+          <button onclick="addSongToSetlist(${song.id}, this)"
+                  class="btn btn-sm btn-marifa gap-1" title="Agregar al setlist">
             <i class="fas fa-plus text-xs"></i>
           </button>
         </div>

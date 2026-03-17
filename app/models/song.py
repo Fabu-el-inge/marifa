@@ -53,7 +53,8 @@ class Song(db.Model):
             return None
         import os
         supabase_url = os.environ.get('SUPABASE_URL', '')
-        if supabase_url:
+        supabase_key = os.environ.get('SUPABASE_SERVICE_KEY', '')
+        if supabase_url and supabase_key:
             return f'{supabase_url}/storage/v1/object/public/recordings/{self.recording_path}'
         return f'/songs/recordings/{self.recording_path}'
 
