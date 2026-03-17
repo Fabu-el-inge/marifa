@@ -600,6 +600,16 @@ select.marifa-input {
   .topbar-actions::-webkit-scrollbar {
     display: none;
   }
+
+  /* Topbar action buttons: full width on mobile */
+  .topbar-actions {
+    flex: 1;
+    min-width: 0;
+  }
+  .topbar-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ===== PRINT ===== */
