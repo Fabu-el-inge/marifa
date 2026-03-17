@@ -4,9 +4,9 @@
 {% block page_subtitle %}{{ bands|length }} banda{{ 's' if bands|length != 1 }} prearmada{{ 's' if bands|length != 1 }}{% endblock %}
 
 {% block topbar_actions %}
-<a href="{{ url_for('bands.new') }}" class="btn btn-marifa btn-sm gap-2"
-   style="min-height:36px; font-size:0.8rem !important; padding:0.4rem 0.75rem !important;">
-  <i class="fas fa-plus"></i> <span class="hidden md:inline">Nueva </span>Banda
+<a href="{{ url_for('bands.new') }}" class="btn btn-marifa gap-2"
+   style="min-height:40px; font-size:0.9rem !important; padding:0.5rem 1rem !important;">
+  <i class="fas fa-plus"></i> Nueva Banda
 </a>
 {% endblock %}
 
