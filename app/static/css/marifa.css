@@ -540,6 +540,68 @@ select.marifa-input {
   white-space: pre;
 }
 
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 767px) {
+  /* Filtros del catálogo: stack vertical */
+  .marifa-card .flex.flex-wrap.gap-3.items-end {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .marifa-card .flex.flex-wrap.gap-3.items-end .flex-1.min-w-48 {
+    min-width: 0;
+    width: 100%;
+  }
+  .marifa-card .flex.flex-wrap.gap-3.items-end > div,
+  .marifa-card .flex.flex-wrap.gap-3.items-end > button,
+  .marifa-card .flex.flex-wrap.gap-3.items-end > a {
+    width: 100%;
+  }
+  .marifa-card .flex.flex-wrap.gap-3.items-end select {
+    width: 100%;
+  }
+
+  /* Builder: stack vertical instead of side-by-side */
+  .builder-bg {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+  .builder-bg > .w-80 {
+    width: 100% !important;
+    max-height: none !important;
+    position: static !important;
+  }
+  .builder-bg > .w-80 > .marifa-card {
+    max-height: 50vh;
+  }
+
+  /* Setlist number smaller on mobile */
+  .setlist-number {
+    font-size: 1.6rem;
+    min-width: 36px;
+  }
+
+  /* Cards: full width */
+  .catalog-song { margin-bottom: 0.5rem; }
+
+  /* Modals: full width on mobile */
+  #lyrics-modal > div,
+  #confirm-modal > div {
+    max-width: 95vw !important;
+    max-height: 90vh !important;
+    margin: 0.5rem;
+  }
+
+  /* Modal header buttons: wrap */
+  #lyrics-modal .flex.items-center.gap-1.flex-shrink-0 {
+    gap: 0;
+  }
+  #lyrics-modal .flex.items-center.gap-1.flex-shrink-0 .btn {
+    padding: 0.25rem;
+    min-height: auto;
+    height: auto;
+  }
+}
+
 /* ===== PRINT ===== */
 @media print {
   .no-print { display: none !important; }

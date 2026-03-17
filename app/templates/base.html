@@ -30,6 +30,86 @@
     .btn { border-radius: 10px; font-family: 'Inter', sans-serif; }
     .badge { border-radius: 20px; }
     input, select, textarea { font-family: 'Inter', sans-serif; }
+
+    /* ===== MOBILE: Ocultar sidebar, mostrar bottom nav ===== */
+    @media (max-width: 767px) {
+      .sidebar { display: none !important; }
+      .main-content { margin-left: 0 !important; }
+      .main-content main { padding: 1rem !important; padding-bottom: 5rem !important; }
+      .topbar { padding-left: 1rem !important; padding-right: 1rem !important; }
+      .topbar .topbar-actions { gap: 0.375rem !important; }
+      .topbar .topbar-actions .btn { font-size: 0.75rem !important; padding: 0.25rem 0.5rem !important; }
+    }
+
+    /* ===== Bottom Nav (mobile only) ===== */
+    .mobile-bottom-nav {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 40;
+      background: linear-gradient(180deg, #1e3d2f 0%, #14291f 100%);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 0.375rem 0 calc(0.375rem + env(safe-area-inset-bottom));
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
+    }
+    @media (max-width: 767px) {
+      .mobile-bottom-nav { display: flex; }
+    }
+
+    .mobile-bottom-nav a {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      padding: 0.375rem 0;
+      color: rgba(255,255,255,0.45);
+      font-size: 0.6rem;
+      font-weight: 500;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .mobile-bottom-nav a i { font-size: 1.1rem; }
+    .mobile-bottom-nav a.active {
+      color: #f9a8b8;
+    }
+    .mobile-bottom-nav a.active i {
+      filter: drop-shadow(0 0 6px rgba(244,63,94,0.5));
+    }
+
+    /* ===== Mobile topbar hamburger ===== */
+    .mobile-menu-btn { display: none; }
+    @media (max-width: 767px) {
+      .mobile-menu-btn { display: flex; }
+    }
+
+    /* Mobile slide-over menu */
+    .mobile-menu-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: rgba(0,0,0,0.5);
+    }
+    .mobile-menu-overlay.open { display: block; }
+    .mobile-menu-panel {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      z-index: 51;
+      background: linear-gradient(180deg, #1e3d2f 0%, #14291f 60%, #0e1f17 100%);
+      box-shadow: 4px 0 24px rgba(0,0,0,0.3);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      overflow-y: auto;
+    }
+    .mobile-menu-overlay.open .mobile-menu-panel {
+      transform: translateX(0);
+    }
   </style>
 
   {% block extra_head %}{% endblock %}
@@ -40,7 +120,7 @@
 <!-- ===== LAYOUT CON SIDEBAR ===== -->
 <div class="flex min-h-screen">
 
-  <!-- SIDEBAR -->
+  <!-- SIDEBAR (desktop only, hidden on mobile via CSS) -->
   <aside class="sidebar w-52 flex-shrink-0 flex flex-col fixed left-0 top-0 z-30"
          style="height: 100vh;">
 
@@ -160,18 +240,76 @@
 
   </aside>
 
+  <!-- MOBILE: Slide-over menu -->
+  <div id="mobile-menu" class="mobile-menu-overlay" onclick="if(event.target===this) closeMobileMenu()">
+    <div class="mobile-menu-panel">
+      <div class="pt-4 pb-3 px-5">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <span class="marifa-logo-icon text-2xl leading-none">♪</span>
+            <span class="marifa-logo text-2xl">MariFá</span>
+          </div>
+          <button onclick="closeMobileMenu()" style="color:rgba(255,255,255,0.5); background:none; border:none; font-size:1.2rem; cursor:pointer;">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);"></div>
+      </div>
+      <div class="px-4 pb-4">
+        <p style="color:rgba(255,255,255,0.25); font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0 10px; margin-bottom:6px;">Catálogo</p>
+        <nav class="space-y-1 mb-3">
+          <a href="{{ url_for('songs.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('songs') %}active{% endif %}"><i class="fas fa-music w-4 text-sm"></i><span>Canciones</span></a>
+          <a href="{{ url_for('songs.new') }}" class="nav-link"><i class="fas fa-plus-circle w-4 text-sm"></i><span>Nueva Canción</span></a>
+        </nav>
+        <p style="color:rgba(255,255,255,0.25); font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0 10px; margin-bottom:6px;">Shows</p>
+        <nav class="space-y-1 mb-3">
+          <a href="{{ url_for('shows.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('shows') %}active{% endif %}"><i class="fas fa-calendar-alt w-4 text-sm"></i><span>Mis Shows</span></a>
+          <a href="{{ url_for('shows.new') }}" class="nav-link"><i class="fas fa-calendar-plus w-4 text-sm"></i><span>Nuevo Show</span></a>
+        </nav>
+        <p style="color:rgba(255,255,255,0.25); font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0 10px; margin-bottom:6px;">Bandas</p>
+        <nav class="space-y-1 mb-3">
+          <a href="{{ url_for('bands.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('bands') %}active{% endif %}"><i class="fas fa-guitar w-4 text-sm"></i><span>Mis Bandas</span></a>
+          <a href="{{ url_for('bands.new') }}" class="nav-link"><i class="fas fa-plus-circle w-4 text-sm"></i><span>Nueva Banda</span></a>
+        </nav>
+        <p style="color:rgba(255,255,255,0.25); font-size:0.65rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; padding:0 10px; margin-bottom:6px;">Músicos</p>
+        <nav class="space-y-1 mb-3">
+          <a href="{{ url_for('musicians.index') }}" class="nav-link {% if request.endpoint and request.endpoint.startswith('musicians') %}active{% endif %}"><i class="fas fa-users w-4 text-sm"></i><span>Mis Músicos</span></a>
+          <a href="{{ url_for('musicians.new') }}" class="nav-link"><i class="fas fa-user-plus w-4 text-sm"></i><span>Nuevo Músico</span></a>
+        </nav>
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin:1rem 0;"></div>
+        <div class="flex items-center justify-between px-2">
+          <div class="flex items-center gap-2">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                 style="background:linear-gradient(135deg,#f43f5e,#f59e0b);">{{ current_user.username[0].upper() }}</div>
+            <span style="color:rgba(255,255,255,0.85); font-size:0.85rem; font-weight:600;">{{ current_user.username }}</span>
+          </div>
+          <a href="{{ url_for('auth.logout') }}" class="text-xs px-3 py-1.5 rounded-lg" style="color:rgba(255,255,255,0.5); background:rgba(255,255,255,0.08);">
+            <i class="fas fa-sign-out-alt mr-1"></i>Salir
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MAIN CONTENT -->
-  <div class="flex-1 ml-52 flex flex-col min-h-screen">
+  <div class="main-content flex-1 ml-52 flex flex-col min-h-screen">
 
     <!-- TOPBAR -->
-    <header class="topbar sticky top-0 z-20 px-6 py-3 flex items-center justify-between">
-      <div>
-        <h1 class="text-lg font-bold" style="font-family: 'Playfair Display', serif; color: #1e1b2e;">
-          {% block page_title %}{% endblock %}
-        </h1>
-        <p class="text-xs" style="color: #9ca3af;">{% block page_subtitle %}{% endblock %}</p>
+    <header class="topbar sticky top-0 z-20 px-6 py-3 flex items-center justify-between gap-2">
+      <div class="flex items-center gap-3 min-w-0">
+        <!-- Hamburger (mobile only) -->
+        <button onclick="openMobileMenu()" class="mobile-menu-btn items-center justify-center w-9 h-9 rounded-lg"
+                style="color:#1e1b2e; background:rgba(124,58,237,0.08); border:none; cursor:pointer; flex-shrink:0;">
+          <i class="fas fa-bars"></i>
+        </button>
+        <div class="min-w-0">
+          <h1 class="text-lg font-bold truncate" style="font-family: 'Playfair Display', serif; color: #1e1b2e;">
+            {% block page_title %}{% endblock %}
+          </h1>
+          <p class="text-xs truncate" style="color: #9ca3af;">{% block page_subtitle %}{% endblock %}</p>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
+      <div class="topbar-actions flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
         {% block topbar_actions %}{% endblock %}
       </div>
     </header>
@@ -179,7 +317,7 @@
     <!-- FLASH MESSAGES -->
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-      <div class="px-6 pt-4 space-y-2">
+      <div class="px-4 md:px-6 pt-4 space-y-2">
         {% for category, message in messages %}
         <div class="flash-{{ category }} flex items-center gap-3 rounded-xl py-3 px-4 shadow-sm"
              x-data="{ show: true }" x-show="show"
@@ -212,6 +350,35 @@
 
   </div>
 </div>
+
+<!-- MOBILE: Bottom Navigation Bar -->
+<nav class="mobile-bottom-nav">
+  <a href="{{ url_for('songs.index') }}" {% if request.endpoint and request.endpoint.startswith('songs') %}class="active"{% endif %}>
+    <i class="fas fa-music"></i>
+    <span>Canciones</span>
+  </a>
+  <a href="{{ url_for('shows.index') }}" {% if request.endpoint and (request.endpoint.startswith('shows') or request.endpoint.startswith('setlist')) %}class="active"{% endif %}>
+    <i class="fas fa-calendar-alt"></i>
+    <span>Shows</span>
+  </a>
+  <a href="{{ url_for('bands.index') }}" {% if request.endpoint and request.endpoint.startswith('bands') %}class="active"{% endif %}>
+    <i class="fas fa-guitar"></i>
+    <span>Bandas</span>
+  </a>
+  <a href="{{ url_for('musicians.index') }}" {% if request.endpoint and request.endpoint.startswith('musicians') %}class="active"{% endif %}>
+    <i class="fas fa-users"></i>
+    <span>Músicos</span>
+  </a>
+</nav>
+
+<script>
+function openMobileMenu() {
+  document.getElementById('mobile-menu').classList.add('open');
+}
+function closeMobileMenu() {
+  document.getElementById('mobile-menu').classList.remove('open');
+}
+</script>
 
 {% else %}
 <!-- Sin sidebar (auth pages) -->
