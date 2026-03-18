@@ -18,6 +18,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Driver.js (tour) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.css" />
+
   <!-- Custom CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='css/marifa.css') }}" />
 
@@ -163,7 +166,7 @@
       <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 6px;">
         Catálogo
       </p>
-      <nav class="space-y-0.5 mb-2">
+      <nav class="space-y-0.5 mb-2" data-tour="nav-songs">
         <a href="{{ url_for('songs.index') }}"
            class="nav-link {% if request.endpoint and request.endpoint.startswith('songs') and request.endpoint != 'songs.new' %}active{% endif %}">
           <i class="fas fa-music w-4 text-sm"></i>
@@ -180,7 +183,7 @@
       <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
         Shows
       </p>
-      <nav class="space-y-0.5 mb-2">
+      <nav class="space-y-0.5 mb-2" data-tour="nav-shows">
         <a href="{{ url_for('shows.index') }}"
            class="nav-link {% if request.endpoint and request.endpoint.startswith('shows') and request.endpoint != 'shows.new' %}active{% endif %}">
           <i class="fas fa-calendar-alt w-4 text-sm"></i>
@@ -197,7 +200,7 @@
       <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
         Bandas
       </p>
-      <nav class="space-y-0.5 mb-2">
+      <nav class="space-y-0.5 mb-2" data-tour="nav-bands">
         <a href="{{ url_for('bands.index') }}"
            class="nav-link {% if request.endpoint and request.endpoint.startswith('bands') and request.endpoint != 'bands.new' %}active{% endif %}">
           <i class="fas fa-guitar w-4 text-sm"></i>
@@ -214,7 +217,7 @@
       <p style="color: rgba(255,255,255,0.25); font-size: 0.65rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; padding: 0 14px; margin-bottom: 4px;">
         Músicos
       </p>
-      <nav class="space-y-0.5">
+      <nav class="space-y-0.5" data-tour="nav-musicians">
         <a href="{{ url_for('musicians.index') }}"
            class="nav-link {% if request.endpoint and request.endpoint.startswith('musicians') and request.endpoint != 'musicians.new' %}active{% endif %}">
           <i class="fas fa-users w-4 text-sm"></i>
@@ -242,12 +245,34 @@
             {{ current_user.username }}
           </p>
         </div>
-        <a href="{{ url_for('auth.logout') }}"
-           class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
-           style="color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);"
-           title="Cerrar sesión">
-          <i class="fas fa-sign-out-alt text-sm"></i>
-        </a>
+        <div class="flex items-center gap-1">
+          <div class="relative">
+            <button id="help-btn" onclick="toggleHelpMenu()"
+                    class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                    style="color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);"
+                    title="Ayuda">
+              <i class="fas fa-question-circle text-sm"></i>
+            </button>
+            <div id="help-menu" style="display:none; position:absolute; bottom:calc(100% + 8px); right:0; z-index:100;
+                    background:white; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+                    min-width:180px; overflow:hidden;">
+              <button onclick="toggleHelpMenu(); openTutorialModal();"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2" style="color:#1e1b2e;">
+                <i class="fas fa-book-open text-xs" style="color:#7c3aed;"></i> Guía completa
+              </button>
+              <button onclick="toggleHelpMenu(); setTimeout(replayCurrentTour, 200);"
+                      class="w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 flex items-center gap-2 border-t border-gray-100" style="color:#1e1b2e;">
+                <i class="fas fa-play text-xs" style="color:#f43f5e;"></i> Repetir tour
+              </button>
+            </div>
+          </div>
+          <a href="{{ url_for('auth.logout') }}"
+             class="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+             style="color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05);"
+             title="Cerrar sesión">
+            <i class="fas fa-sign-out-alt text-sm"></i>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -290,6 +315,15 @@
           <a href="{{ url_for('musicians.new') }}" class="nav-link"><i class="fas fa-user-plus w-4 text-sm"></i><span>Nuevo Músico</span></a>
         </nav>
         <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin:1rem 0;"></div>
+        <nav class="space-y-1 mb-3">
+          <a onclick="closeMobileMenu(); openTutorialModal();" class="nav-link" style="cursor:pointer;">
+            <i class="fas fa-book-open w-4 text-sm"></i><span>Guía de uso</span>
+          </a>
+          <a onclick="closeMobileMenu(); setTimeout(replayCurrentTour, 300);" class="nav-link" style="cursor:pointer;">
+            <i class="fas fa-play w-4 text-sm"></i><span>Repetir tour</span>
+          </a>
+        </nav>
+        <div style="height:1px; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent); margin:0 0 1rem;"></div>
         <div class="flex items-center justify-between px-2">
           <div class="flex items-center gap-2">
             <div class="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold"
@@ -411,6 +445,15 @@ function closeMobileMenu() {
 
 {% block auth_content %}{% endblock %}
 {% endif %}
+
+<!-- Tutorial Modal -->
+{% if current_user.is_authenticated %}
+{% include 'partials/tutorial_modal.html' %}
+{% endif %}
+
+<!-- Driver.js (tour) -->
+<script src="https://cdn.jsdelivr.net/npm/driver.js@1.3.1/dist/driver.js.iife.js"></script>
+<script src="{{ url_for('static', filename='js/tour.js') }}?v={{ range(10000,99999)|random }}"></script>
 
 <!-- SortableJS -->
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.3/Sortable.min.js"></script>

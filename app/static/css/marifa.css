@@ -612,6 +612,91 @@ select.marifa-input {
   }
 }
 
+/* ===== DRIVER.JS TOUR THEME ===== */
+.driver-popover {
+  background: white !important;
+  border: 1px solid #e9d5ff !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 32px rgba(124,58,237,0.15) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+.driver-popover .driver-popover-title {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.1rem !important;
+  color: #1e1b2e !important;
+}
+.driver-popover .driver-popover-description {
+  color: #4b5563 !important;
+  font-size: 0.85rem !important;
+  line-height: 1.5 !important;
+}
+.driver-popover .driver-popover-progress-text {
+  color: #9ca3af !important;
+  font-size: 0.7rem !important;
+}
+.driver-popover .driver-popover-next-btn {
+  background: linear-gradient(135deg, #7c3aed, #f43f5e) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 1rem !important;
+  font-weight: 600 !important;
+  text-shadow: none !important;
+}
+.driver-popover .driver-popover-prev-btn {
+  color: #7c3aed !important;
+  border: 1px solid #e9d5ff !important;
+  border-radius: 8px !important;
+  padding: 0.4rem 1rem !important;
+  background: white !important;
+}
+.driver-popover .driver-popover-close-btn {
+  color: #9ca3af !important;
+}
+.driver-popover-arrow-side-left .driver-popover-arrow,
+.driver-popover-arrow-side-right .driver-popover-arrow,
+.driver-popover-arrow-side-top .driver-popover-arrow,
+.driver-popover-arrow-side-bottom .driver-popover-arrow {
+  border-color: #e9d5ff !important;
+}
+
+/* ===== TUTORIAL MODAL ===== */
+.tutorial-tab {
+  background: #f5f0ff;
+  color: #7c3aed;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.tutorial-tab:hover {
+  background: #ede9fe;
+}
+.tutorial-tab.active {
+  background: linear-gradient(135deg, #7c3aed, #f43f5e);
+  color: white;
+  border-color: transparent;
+}
+
+.tut-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: 12px;
+  background: #faf8ff;
+  border: 1px solid #f3f0ff;
+}
+.tut-step-icon {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.85rem;
+}
+
 /* ===== PRINT ===== */
 @media print {
   .no-print { display: none !important; }

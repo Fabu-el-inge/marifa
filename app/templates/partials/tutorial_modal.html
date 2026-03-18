@@ -1,0 +1,263 @@
+<!-- Tutorial Modal -->
+<div id="tutorial-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+     style="background:rgba(0,0,0,0.6); display:none;"
+     onclick="if(event.target===this) closeTutorialModal()">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <div>
+        <h2 class="font-serif text-xl font-bold" style="color:#1e1b2e;">
+          <i class="fas fa-book-open mr-2" style="color:#7c3aed;"></i>Guía de MariFá
+        </h2>
+        <p class="text-xs text-gray-500 mt-0.5">Aprendé a usar cada sección</p>
+      </div>
+      <button onclick="closeTutorialModal()" class="btn btn-ghost btn-sm btn-circle text-gray-400 hover:text-gray-600">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 px-5 pt-3 pb-2 overflow-x-auto" style="scrollbar-width:none;">
+      <button onclick="showTutorialSection('songs')" data-tut-tab="songs"
+              class="tutorial-tab active flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all">
+        <i class="fas fa-music"></i> Canciones
+      </button>
+      <button onclick="showTutorialSection('shows')" data-tut-tab="shows"
+              class="tutorial-tab flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all">
+        <i class="fas fa-calendar-alt"></i> Shows
+      </button>
+      <button onclick="showTutorialSection('builder')" data-tut-tab="builder"
+              class="tutorial-tab flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all">
+        <i class="fas fa-list-ol"></i> Setlist
+      </button>
+      <button onclick="showTutorialSection('bands')" data-tut-tab="bands"
+              class="tutorial-tab flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all">
+        <i class="fas fa-guitar"></i> Bandas
+      </button>
+      <button onclick="showTutorialSection('musicians')" data-tut-tab="musicians"
+              class="tutorial-tab flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all">
+        <i class="fas fa-users"></i> Músicos
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto px-5 py-4">
+
+      <!-- Canciones -->
+      <div id="tut-songs" class="tutorial-section">
+        <div class="space-y-4">
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+              <i class="fas fa-plus"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">1. Agregá canciones</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Tocá <strong>"Agregar Nueva Canción"</strong> y completá título, artista, género, tonalidad y BPM. Podés buscar en YouTube para importar la duración automáticamente.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#6d28d9,#7c3aed);">
+              <i class="fas fa-align-left"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">2. Letra y acordes</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Usá <strong>"Buscar letra"</strong> para importar automáticamente y <strong>"Acordes"</strong> para generar los acordes con IA. También podés grabar un audio de referencia.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#f43f5e,#f59e0b);">
+              <i class="fas fa-search"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">3. Buscá y filtrá</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Usá los filtros del catálogo para encontrar canciones por nombre, artista o género. Hacé click en una tarjeta para ver la letra completa.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#059669,#10b981);">
+              <i class="fas fa-microphone"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">4. Grabaciones de referencia</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Grabá un audio directamente o subí un archivo. Ideal para recordar arreglos o versiones específicas antes del show.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shows -->
+      <div id="tut-shows" class="tutorial-section" style="display:none;">
+        <div class="space-y-4">
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+              <i class="fas fa-calendar-plus"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">1. Creá un show</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Tocá <strong>"Agregar Nuevo Show"</strong> y poné la fecha, nombre del evento, lugar y ciudad. Podés hacerlo público para compartir el setlist.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+              <i class="fas fa-users"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">2. Asigná músicos</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Seleccioná los músicos que van a tocar. Podés asignar una banda completa o elegir músicos individuales.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
+              <i class="fas fa-info-circle"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">3. Estado automático</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Cada show muestra su estado automáticamente: <strong>★ HOY</strong> si es hoy, <strong>próximo</strong> si es futuro, o <strong>pasado</strong>. Los próximos aparecen primero.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#059669,#10b981);">
+              <i class="fas fa-mouse-pointer"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">4. Abrí el Setlist Builder</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Hacé click en cualquier show para abrir el armador de setlist donde vas a elegir y ordenar las canciones.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Setlist Builder -->
+      <div id="tut-builder" class="tutorial-section" style="display:none;">
+        <div class="space-y-4">
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+              <i class="fas fa-search"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">1. Buscá canciones</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Usá el buscador del catálogo para encontrar canciones. Tocá el botón <strong>+</strong> para agregarlas al setlist.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#6d28d9,#7c3aed);">
+              <i class="fas fa-arrows-alt"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">2. Arrastrá para ordenar</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Mantené presionado y arrastrá las canciones para cambiar el orden. El número de posición se actualiza automáticamente.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+              <i class="fas fa-coffee"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">3. Agregá intervalos</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Usá <strong>"Agregar Intervalo"</strong> para separar bloques de canciones. Ideal para marcar descansos o cambios de set.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#059669,#10b981);">
+              <i class="fas fa-eye"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">4. Letra en vivo</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Hacé click en una canción del setlist para ver su letra y acordes al instante. Perfecto para repasar antes o durante el show.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
+              <i class="fas fa-print"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">5. Imprimí o compartí</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Descargá el setlist en PDF para llevar al show o compartilo con tu banda.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bandas -->
+      <div id="tut-bands" class="tutorial-section" style="display:none;">
+        <div class="space-y-4">
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+              <i class="fas fa-guitar"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">1. Creá una banda</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Tocá <strong>"Agregar Nueva Banda"</strong> y dale un nombre. Después agregá los músicos que la integran.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#d97706,#f59e0b);">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">2. Asigná músicos</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Seleccioná músicos de tu directorio para la banda. Cada uno con su instrumento y tarifa.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#059669,#10b981);">
+              <i class="fas fa-calculator"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">3. Presupuesto automático</h4>
+              <p class="text-xs text-gray-600 mt-0.5">El presupuesto total se calcula sumando la tarifa de cada músico. Útil para cotizar shows rápido.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Músicos -->
+      <div id="tut-musicians" class="tutorial-section" style="display:none;">
+        <div class="space-y-4">
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#7c3aed,#f43f5e);">
+              <i class="fas fa-user-plus"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">1. Agregá músicos</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Cargá nombre, instrumento, teléfono, email y tarifa de cada músico.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#25D366,#128C7E);">
+              <i class="fab fa-whatsapp"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">2. Contacto rápido</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Tocá el ícono de WhatsApp para contactar a un músico directamente. Sin buscar el número.</p>
+            </div>
+          </div>
+          <div class="tut-step">
+            <div class="tut-step-icon" style="background:linear-gradient(135deg,#2563eb,#7c3aed);">
+              <i class="fas fa-layer-group"></i>
+            </div>
+            <div>
+              <h4 class="font-bold text-sm" style="color:#1e1b2e;">3. Agrupados por instrumento</h4>
+              <p class="text-xs text-gray-600 mt-0.5">Los músicos se organizan automáticamente por instrumento para encontrarlos más fácil.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+      <button onclick="closeTutorialModal(); setTimeout(function(){ replayCurrentTour(); }, 300);"
+              class="btn btn-sm gap-2 font-medium"
+              style="background:#f5f0ff; color:#7c3aed; border:1px solid #e9d5ff;">
+        <i class="fas fa-play"></i> Ver tour interactivo
+      </button>
+      <button onclick="closeTutorialModal()" class="btn btn-sm btn-ghost text-gray-500">
+        Cerrar
+      </button>
+    </div>
+
+  </div>
+</div>
