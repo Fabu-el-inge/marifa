@@ -162,7 +162,8 @@ const TOURS = {
 };
 
 // ---- Driver.js initialization ----
-function createDriver() {
+function createDriver(onDone) {
+  if (!window.driver || !window.driver.js) return null;
   return window.driver.js.driver({
     showProgress: true,
     animate: true,
@@ -174,37 +175,32 @@ function createDriver() {
     prevBtnText: '← Anterior',
     doneBtnText: '¡Listo!',
     progressText: '{{current}} de {{total}}',
+    onDestroyed: onDone || function() {},
   });
 }
 
 function startTour(tourName) {
-  const tour = TOURS[tourName];
+  var tour = TOURS[tourName];
   if (!tour) return;
-  const steps = tour.steps();
+  var steps = tour.steps();
   if (!steps || steps.length === 0) return;
 
   // Filter out steps whose elements don't exist
-  const validSteps = steps.filter(function(s) {
+  var validSteps = steps.filter(function(s) {
     return !s.element || document.querySelector(s.element);
   });
   if (validSteps.length === 0) return;
 
-  const d = createDriver();
+  var d = createDriver(function() {
+    if (tour.key) localStorage.setItem(tour.key, 'done');
+  });
+  if (!d) return;
   d.setSteps(validSteps);
   d.drive();
-
-  // Mark as done when destroyed
-  if (tour.key) {
-    var origDestroy = d.destroy.bind(d);
-    d.destroy = function() {
-      localStorage.setItem(tour.key, 'done');
-      origDestroy();
-    };
-  }
 }
 
 function replayCurrentTour() {
-  const page = detectPage();
+  var page = detectPage();
   if (page && TOURS[page]) {
     startTour(page);
   } else {
@@ -214,14 +210,20 @@ function replayCurrentTour() {
 
 // ---- Auto-start on first visit ----
 function autoStartTour() {
-  // Welcome tour first
+  var page = detectPage();
+
+  // Form pages: show form-specific tour first, skip welcome
+  if (page && page.endsWith('_form') && TOURS[page] && !localStorage.getItem(TOURS[page].key)) {
+    startTour(page);
+    return;
+  }
+
+  // Index pages: welcome tour first, then page-specific
   if (!localStorage.getItem(TOURS.welcome.key)) {
     startTour('welcome');
     return;
   }
 
-  // Then page-specific tour
-  const page = detectPage();
   if (page && TOURS[page] && !localStorage.getItem(TOURS[page].key)) {
     startTour(page);
   }
