@@ -104,6 +104,60 @@ const TOURS = {
       ];
       return steps;
     }
+  },
+
+  song_form: {
+    key: 'marifa_tour_song_form',
+    steps: function() {
+      const steps = [];
+      var yt = document.querySelector('[data-tour="yt-search"]');
+      if (yt) steps.push({ element: '[data-tour="yt-search"]', popover: { title: 'Importar desde YouTube', description: 'Buscá una canción en YouTube o pegá el link directo. Se auto-completan título, artista y duración.', side: 'bottom' }});
+      var title = document.getElementById('title');
+      if (title) steps.push({ element: '#title', popover: { title: 'Datos de la canción', description: 'Completá título, artista, género, tonalidad y BPM. Solo el título y género son obligatorios.', side: 'bottom' }});
+      var lyrics = document.getElementById('lyrics-toggle');
+      if (lyrics) steps.push({ element: '#lyrics-toggle', popover: { title: 'Letra y acordes', description: 'Abrí esta sección para escribir la letra. Usá "Buscar letra" para importar automáticamente y "Acordes" para generar acordes con IA.', side: 'bottom' }});
+      var rec = document.getElementById('rec-btn');
+      if (rec) steps.push({ element: '#rec-btn', popover: { title: 'Grabación de referencia', description: 'Grabá un audio directamente desde el micrófono o subí un archivo. Ideal para recordar arreglos.', side: 'bottom' }});
+      return steps;
+    }
+  },
+
+  show_form: {
+    key: 'marifa_tour_show_form',
+    steps: function() {
+      const steps = [];
+      var name = document.getElementById('name');
+      if (name) steps.push({ element: '#name', popover: { title: 'Datos del show', description: 'Poné el nombre del evento, fecha, lugar y ciudad.', side: 'bottom' }});
+      var mus = document.getElementById('musicians-section');
+      if (mus) steps.push({ element: '#musicians-section', popover: { title: 'Músicos del show', description: 'Seleccioná los músicos que van a tocar. Podés elegir individualmente o asignar una banda completa.', side: 'bottom' }});
+      return steps;
+    }
+  },
+
+  band_form: {
+    key: 'marifa_tour_band_form',
+    steps: function() {
+      const steps = [];
+      var name = document.querySelector('input[name="name"]');
+      if (name) steps.push({ element: 'input[name="name"]', popover: { title: 'Nombre de la banda', description: 'Dale un nombre a tu banda para identificarla fácilmente.', side: 'bottom' }});
+      var members = document.getElementById('selected-musicians');
+      if (members) steps.push({ element: '#selected-musicians', popover: { title: 'Integrantes', description: 'Seleccioná músicos de tu directorio. El presupuesto total se calcula automáticamente sumando las tarifas.', side: 'bottom' }});
+      return steps;
+    }
+  },
+
+  musician_form: {
+    key: 'marifa_tour_musician_form',
+    steps: function() {
+      const steps = [];
+      var name = document.querySelector('input[name="name"]');
+      if (name) steps.push({ element: 'input[name="name"]', popover: { title: 'Datos del músico', description: 'Cargá nombre, instrumento, teléfono y email.', side: 'bottom' }});
+      var phone = document.querySelector('input[name="phone"]');
+      if (phone) steps.push({ element: 'input[name="phone"]', popover: { title: 'Teléfono / WhatsApp', description: 'Con el número cargado vas a poder contactarlo directo por WhatsApp desde la lista de músicos.', side: 'bottom' }});
+      var instrument = document.querySelector('select[name="instrument"]');
+      if (instrument) steps.push({ element: 'select[name="instrument"]', popover: { title: 'Instrumento', description: 'Seleccioná el instrumento principal del músico. Se usa para agruparlos en el directorio.', side: 'bottom' }});
+      return steps;
+    }
   }
 };
 
