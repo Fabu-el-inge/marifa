@@ -9,5 +9,4 @@ migrate = Migrate()
 csrf = CSRFProtect()
 
 login_manager.login_view = 'auth.login'
-login_manager.login_message = 'Iniciá sesión para acceder a Marifé.'
-login_manager.login_message_category = 'warning'
+login_manager.login_message = None
