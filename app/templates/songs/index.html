@@ -627,9 +627,10 @@ function deleteModalRecording() {
 
 function closeLyricsModal() {
   document.getElementById('lyrics-modal').style.display = 'none';
-  const a = document.getElementById('modal-audio');
-  a.pause();
-  a.src = '';
+  ['modal-audio', 'modal-rec-existing-audio', 'modal-rec-new-audio'].forEach(function(id) {
+    const el = document.getElementById(id);
+    if (el) { el.pause(); el.src = ''; }
+  });
   // Detener grabación si está activa
   if (_modalIsRec && _modalMr && _modalMr.state !== 'inactive') { _modalMr.stop(); }
   clearInterval(_modalTimerInt); _modalIsRec = false;

@@ -9,3 +9,5 @@ migrate_users.py
 seed.py
 nul
 audios/
+.vercel
+.env*.local

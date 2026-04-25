@@ -988,8 +988,10 @@ var SONGS_DATA = {
 
   function closeLyricsModal() {
     document.getElementById('lyrics-modal').style.display = 'none';
-    var a = document.getElementById('modal-audio');
-    if (a) { a.pause(); a.src = ''; }
+    ['modal-audio', 'modal-rec-existing-audio', 'modal-rec-new-audio'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) { el.pause(); el.src = ''; }
+    });
     if (_modalIsRec && _modalMr && _modalMr.state !== 'inactive') _modalMr.stop();
     clearInterval(_modalTimerInt); _modalIsRec = false;
     document.getElementById('modal-yt-iframe').src = '';

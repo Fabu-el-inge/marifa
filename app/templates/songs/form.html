@@ -654,6 +654,14 @@ function generateChords() {
     if (!window._lyricsOpen) document.getElementById('lyrics-toggle').click();
     setTimeout(function() {
       var ta = document.getElementById('lyrics');
+      if (ta.value.trim() && ta.value.trim() !== data.lyrics.trim()) {
+        if (!confirm('Ya tenés letra cargada. ¿Reemplazarla con la versión de CifraClub (letra + acordes)?')) {
+          status.textContent = 'Reemplazo cancelado.';
+          status.style.color = '#6b7280';
+          status.style.display = 'inline';
+          return;
+        }
+      }
       ta.value = data.lyrics;
       autoResize(ta);
       var srcLabel = data.source === 'cifraclub' ? '✓ Acordes reales (Cifra Club)'
