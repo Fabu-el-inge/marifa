@@ -57,6 +57,19 @@ def create_app(config_name=None):
     def health():
         return 'ok', 200
 
+    # PWA: el service worker debe servirse desde la raíz para tener scope global
+    from flask import send_from_directory
+    @app.route('/service-worker.js')
+    def service_worker():
+        resp = send_from_directory(app.static_folder, 'service-worker.js', mimetype='application/javascript')
+        resp.headers['Service-Worker-Allowed'] = '/'
+        resp.headers['Cache-Control'] = 'no-cache'
+        return resp
+
+    @app.route('/manifest.json')
+    def manifest():
+        return send_from_directory(app.static_folder, 'manifest.json', mimetype='application/manifest+json')
+
     # Keep-alive: evita que Render free tier duerma la app
     if config_name == 'production':
         import threading, urllib.request as _ur
