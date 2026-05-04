@@ -413,7 +413,7 @@ def fetch_youtube():
         oembed_url = 'https://www.youtube.com/oembed?' + urllib.parse.urlencode({
             'url': yt_url, 'format': 'json'
         })
-        req = urllib.request.Request(oembed_url, headers={'User-Agent': 'MariFa-App/1.0'})
+        req = urllib.request.Request(oembed_url, headers={'User-Agent': 'Gigly-App/1.0'})
         with urllib.request.urlopen(req, timeout=6) as resp:
             info = json.loads(resp.read().decode())
     except Exception:
@@ -463,7 +463,7 @@ def fetch_lyrics():
     if not title:
         return jsonify({'error': 'Necesitás al menos el título de la canción'}), 400
 
-    headers = {'User-Agent': 'MariFa-App/1.0'}
+    headers = {'User-Agent': 'Gigly-App/1.0'}
 
     # Intento 1: lrclib.net
     try:

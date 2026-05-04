@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="max-w-lg mx-auto">
-  <div class="marifa-card p-8">
+  <div class="gigly-card p-8">
     <div class="mb-6">
       <h2 class="font-serif text-2xl font-bold mb-1" style="color:#1e1b2e;">
         {% if musician %}✏️ Editar Músico{% else %}🎸 Nuevo Músico{% endif %}
@@ -32,7 +32,7 @@
           </label>
           <input type="text" name="name"
                  value="{{ form.name.data or '' }}"
-                 class="marifa-input w-full px-4 py-3"
+                 class="gigly-input w-full px-4 py-3"
                  placeholder="Nombre del músico" required />
           {% if form.name.errors %}<p class="text-red-500 text-xs mt-1">{{ form.name.errors[0] }}</p>{% endif %}
         </div>
@@ -44,7 +44,7 @@
               <i class="fas fa-music mr-2" style="color:#f43f5e;"></i>Instrumento / Rol *
             </span>
           </label>
-          <select name="instrument" class="marifa-input w-full px-4 py-3">
+          <select name="instrument" class="gigly-input w-full px-4 py-3">
             {% for value, label in form.instrument.choices %}
             <option value="{{ value }}" {% if form.instrument.data == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -60,7 +60,7 @@
           </label>
           <input type="tel" name="phone"
                  value="{{ form.phone.data or '' }}"
-                 class="marifa-input w-full px-4 py-3"
+                 class="gigly-input w-full px-4 py-3"
                  placeholder="+595 981 123 456" />
           <span class="label-text-alt text-xs mt-1" style="color:#6b7280;">
             Con código de país. Se usará para WhatsApp directo.
@@ -76,7 +76,7 @@
           </label>
           <input type="email" name="email"
                  value="{{ form.email.data or '' }}"
-                 class="marifa-input w-full px-4 py-3"
+                 class="gigly-input w-full px-4 py-3"
                  placeholder="musico@ejemplo.com" />
         </div>
 
@@ -87,14 +87,14 @@
               <i class="fas fa-sticky-note mr-2" style="color:#f59e0b;"></i>Notas
             </span>
           </label>
-          <textarea name="notes" class="marifa-input w-full px-4 py-3 resize-none" rows="3"
+          <textarea name="notes" class="gigly-input w-full px-4 py-3 resize-none" rows="3"
                     placeholder="Referencias, disponibilidad, tarifa...">{{ form.notes.data or '' }}</textarea>
         </div>
 
       </div>
 
       <div class="flex gap-3 mt-8">
-        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+        <button type="submit" class="btn btn-gigly flex-1 py-3 font-semibold">
           {% if musician %}<i class="fas fa-save mr-2"></i>Guardar
           {% else %}<i class="fas fa-plus mr-2"></i>Agregar a la Banda
           {% endif %}

@@ -268,7 +268,7 @@ var SONGS_DATA = {
 
   <!-- ===== PANEL IZQUIERDO: CATÁLOGO (desktop: sidebar, mobile: hidden → bottom sheet) ===== -->
   <div class="w-80 flex-shrink-0 hidden md:flex flex-col catalog-panel" style="max-height: calc(100vh - 90px); position: sticky; top: 80px;">
-    <div class="marifa-card flex flex-col h-full overflow-hidden">
+    <div class="gigly-card flex flex-col h-full overflow-hidden">
 
       <div class="p-4 border-b border-gray-800">
         <h2 class="font-serif text-lg text-gray-900 mb-3 flex items-center gap-2">
@@ -279,12 +279,12 @@ var SONGS_DATA = {
         <div class="relative mb-2">
           <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm"></i>
           <input type="text" id="catalog-search"
-                 class="marifa-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
+                 class="gigly-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
                  placeholder="Buscar canción..." autocomplete="off" />
         </div>
 
         <!-- Filtro género -->
-        <select id="catalog-genre" class="marifa-input w-full px-3 py-2 text-gray-900 text-sm mb-2">
+        <select id="catalog-genre" class="gigly-input w-full px-3 py-2 text-gray-900 text-sm mb-2">
           <option value="">Todos los géneros</option>
           {% for g in genres %}
           <option value="{{ g }}">{{ g }}</option>
@@ -292,7 +292,7 @@ var SONGS_DATA = {
         </select>
 
         <!-- Ordenar -->
-        <select id="catalog-sort" class="marifa-input w-full px-3 py-2 text-gray-900 text-sm">
+        <select id="catalog-sort" class="gigly-input w-full px-3 py-2 text-gray-900 text-sm">
           <option value="title">A–Z Título</option>
           <option value="artist">A–Z Artista</option>
           <option value="genre">Por género</option>
@@ -357,19 +357,19 @@ var SONGS_DATA = {
         <div class="relative mb-2">
           <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-600 text-sm"></i>
           <input type="text" id="mobile-catalog-search"
-                 class="marifa-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
+                 class="gigly-input w-full pl-9 pr-4 py-2 text-gray-900 placeholder-gray-400 text-sm"
                  placeholder="Buscar canción..." autocomplete="off"
                  oninput="document.getElementById('catalog-search').value=this.value; document.getElementById('catalog-search').dispatchEvent(new Event('input'));" />
         </div>
         <div class="flex gap-2">
-          <select id="mobile-catalog-genre" class="marifa-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
+          <select id="mobile-catalog-genre" class="gigly-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
                   onchange="document.getElementById('catalog-genre').value=this.value; document.getElementById('catalog-genre').dispatchEvent(new Event('change'));">
             <option value="">Todos los géneros</option>
             {% for g in genres %}
             <option value="{{ g }}">{{ g }}</option>
             {% endfor %}
           </select>
-          <select id="mobile-catalog-sort" class="marifa-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
+          <select id="mobile-catalog-sort" class="gigly-input flex-1 px-2 py-1.5 text-gray-900 text-xs"
                   onchange="document.getElementById('catalog-sort').value=this.value; document.getElementById('catalog-sort').dispatchEvent(new Event('change'));">
             <option value="title">A–Z Título</option>
             <option value="artist">A–Z Artista</option>
@@ -406,7 +406,7 @@ var SONGS_DATA = {
       </div>
 
     <!-- LISTA DE SETLIST -->
-    <div class="marifa-card flex-1 p-4">
+    <div class="gigly-card flex-1 p-4">
       <div id="setlist-list">
 
         {% if not items %}
@@ -1075,7 +1075,7 @@ var SONGS_DATA = {
       +       key + bpm + dur
       +     '</div>'
       +   '</div>'
-      +   '<button onclick="event.stopPropagation();addSongToSetlist('+song.id+',this)" class="btn btn-sm btn-marifa flex-shrink-0" style="min-width:36px;min-height:36px;padding:4px;font-size:1rem;" title="Agregar"><i class="fas fa-plus"></i></button>'
+      +   '<button onclick="event.stopPropagation();addSongToSetlist('+song.id+',this)" class="btn btn-sm btn-gigly flex-shrink-0" style="min-width:36px;min-height:36px;padding:4px;font-size:1rem;" title="Agregar"><i class="fas fa-plus"></i></button>'
       + '</div>'
       + '</div>';
   };

@@ -12,7 +12,7 @@
 
 {% block content %}
 <div class="max-w-2xl mx-auto">
-  <div class="marifa-card p-8">
+  <div class="gigly-card p-8">
     <div class="mb-6">
       <h2 class="font-serif text-2xl text-gray-900 mb-1">
         {% if song %}✏️ Editar Canción{% else %}🎵 Nueva Canción{% endif %}
@@ -30,7 +30,7 @@
       <!-- Buscador -->
       <div class="flex flex-col sm:flex-row gap-2 mb-2">
         <input type="text" id="yt-search"
-               class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
+               class="gigly-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
                placeholder="Buscá por nombre: ej. La Puerta — Aria de Triana" />
         <button type="button" onclick="searchYoutube()"
                 id="yt-search-btn"
@@ -43,7 +43,7 @@
       <!-- O pegar link directo -->
       <div class="flex flex-col sm:flex-row gap-2 mb-2">
         <input type="text" id="yt-url"
-               class="marifa-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
+               class="gigly-input flex-1 px-3 py-2 text-gray-900 placeholder-gray-400 text-sm"
                placeholder="O pegá el link de YouTube directamente..." />
         <button type="button" onclick="importFromYoutube()"
                 id="yt-btn"
@@ -72,7 +72,7 @@
           </label>
           <input type="text" name="title" id="title"
                  value="{{ form.title.data or '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                  placeholder="Nombre de la canción"
                  required />
           {% if form.title.errors %}<span class="text-red-400 text-xs">{{ form.title.errors[0] }}</span>{% endif %}
@@ -87,7 +87,7 @@
           </label>
           <input type="text" name="original_artist" id="original_artist"
                  value="{{ form.original_artist.data or '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                  placeholder="Ej: Mercedes Sosa, Aretha Franklin..." />
         </div>
 
@@ -99,7 +99,7 @@
             </span>
           </label>
           <select name="genre" id="genre"
-                  class="marifa-input w-full px-4 py-3 text-gray-900">
+                  class="gigly-input w-full px-4 py-3 text-gray-900">
             {% for value, label in form.genre.choices %}
             <option value="{{ value }}" {% if form.genre.data == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
@@ -116,7 +116,7 @@
             </label>
             <input type="text" name="key" id="key"
                    value="{{ form.key.data or '' }}"
-                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                    placeholder="Ej: La menor, Re mayor" />
             <div class="flex items-center gap-2 mt-1">
               <span class="text-xs text-gray-400">Escribila manualmente</span>
@@ -130,7 +130,7 @@
             </label>
             <input type="number" name="bpm" id="bpm"
                    value="{{ form.bpm.data or '' }}"
-                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                    placeholder="120" min="1" max="400" />
           </div>
         </div>
@@ -147,7 +147,7 @@
             <div class="relative flex-1">
               <input type="number" name="duration_min" id="duration_min"
                      value="{{ form.duration_min.data if form.duration_min.data is not none else '' }}"
-                     class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                     class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                      placeholder="3" min="0" max="60" />
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">min</span>
             </div>
@@ -155,7 +155,7 @@
             <div class="relative flex-1">
               <input type="number" name="duration_sec_part" id="duration_sec_part"
                      value="{{ form.duration_sec_part.data if form.duration_sec_part.data is not none else '' }}"
-                     class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                     class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                      placeholder="30" min="0" max="59" />
               <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 text-xs">seg</span>
             </div>
@@ -171,7 +171,7 @@
             <span class="label-text-alt text-gray-600 text-xs">Indicaciones técnicas, arreglos, etc.</span>
           </label>
           <textarea name="musician_notes" id="musician_notes"
-                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                    class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                     style="min-height:80px; resize:vertical;"
                     placeholder="Ej: Intro con piano solo, modular a Re en el coro final...">{{ form.musician_notes.data or '' }}</textarea>
         </div>
@@ -186,7 +186,7 @@
           </label>
           <input type="text" name="youtube_url" id="youtube_url"
                  value="{{ form.youtube_url.data or '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                  placeholder="https://www.youtube.com/watch?v=..." />
         </div>
 
@@ -246,7 +246,7 @@
                  accept="audio/*,.m4a,.ogg,.webm,.mp3,.wav,.opus" />
           <div x-show="open" x-transition>
             <textarea name="lyrics" id="lyrics"
-                      class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 font-mono text-sm"
+                      class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 font-mono text-sm"
                       style="min-height:200px; resize:vertical;"
                       placeholder="Letra, cifrado de acordes, etc...">{{ form.lyrics.data or '' }}</textarea>
           </div>
@@ -256,7 +256,7 @@
 
       <!-- Botones -->
       <div class="flex gap-3 mt-8">
-        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+        <button type="submit" class="btn btn-gigly flex-1 py-3 font-semibold">
           {% if song %}
             <i class="fas fa-save mr-2"></i>Guardar cambios
           {% else %}

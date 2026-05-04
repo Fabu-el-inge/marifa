@@ -109,7 +109,7 @@
           <i class="fas fa-user mr-1 text-violet-600"></i>Nombre *
         </label>
         <input type="text" id="nm-name"
-               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               class="gigly-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
                placeholder="Nombre del músico" />
         <p id="nm-error" class="text-red-500 text-xs mt-1" style="display:none;"></p>
       </div>
@@ -118,7 +118,7 @@
         <label class="block text-sm font-medium text-gray-700 mb-1">
           <i class="fas fa-music mr-1 text-violet-600"></i>Instrumento / Rol *
         </label>
-        <select id="nm-instrument" class="marifa-input w-full px-4 py-2 text-gray-900">
+        <select id="nm-instrument" class="gigly-input w-full px-4 py-2 text-gray-900">
           {% for value, label in [
             ('Batería','🥁 Batería'),('Guitarra','🎸 Guitarra'),('Bajo','🎸 Bajo'),
             ('Piano','🎹 Piano'),('Teclado','🎹 Teclado'),('Violín','🎻 Violín'),
@@ -136,14 +136,14 @@
           <i class="fab fa-whatsapp mr-1" style="color:#25D366;"></i>Teléfono / WhatsApp
         </label>
         <input type="tel" id="nm-phone"
-               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               class="gigly-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
                placeholder="+595 981 123 456" />
       </div>
     </div>
     <div class="flex gap-3 p-5 pt-0">
       <button type="button" onclick="submitNewMusician()"
               id="nm-submit-btn"
-              class="btn btn-marifa flex-1 py-2 font-semibold">
+              class="btn btn-gigly flex-1 py-2 font-semibold">
         <i class="fas fa-plus mr-2"></i>Agregar músico
       </button>
       <button type="button" onclick="closeNewMusicianModal()"
@@ -180,7 +180,7 @@
           <i class="fas fa-guitar mr-1 text-violet-600"></i>Nombre *
         </label>
         <input type="text" id="nb-name"
-               class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+               class="gigly-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
                placeholder="Ej: Banda de Cumbia, Trío Acústico, Banda Full" />
         <p id="nb-error" class="text-red-500 text-xs mt-1" style="display:none;"></p>
       </div>
@@ -191,7 +191,7 @@
           <i class="fas fa-sticky-note mr-1" style="color:#f59e0b;"></i>Descripción
         </label>
         <textarea id="nb-description"
-                  class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400 resize-none"
+                  class="gigly-input w-full px-4 py-2 text-gray-900 placeholder-gray-400 resize-none"
                   rows="2"
                   placeholder="Ej: Banda completa para eventos grandes, incluye sonido"></textarea>
       </div>
@@ -203,12 +203,12 @@
             <i class="fas fa-money-bill-wave mr-1" style="color:#f59e0b;"></i>Presupuesto
           </label>
           <input type="number" id="nb-price"
-                 class="marifa-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-2 text-gray-900 placeholder-gray-400"
                  placeholder="0" min="0" step="1000" />
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Moneda</label>
-          <select id="nb-currency" class="marifa-input px-3 py-2 text-gray-900">
+          <select id="nb-currency" class="gigly-input px-3 py-2 text-gray-900">
             <option value="PYG">₲ PYG</option>
             <option value="USD">USD</option>
             <option value="ARS">ARS</option>
@@ -256,7 +256,7 @@
     <div class="flex gap-3 p-5 border-t border-gray-100 flex-shrink-0">
       <button type="button" onclick="submitNewBand()"
               id="nb-submit-btn"
-              class="btn btn-marifa flex-1 py-2 font-semibold">
+              class="btn btn-gigly flex-1 py-2 font-semibold">
         <i class="fas fa-plus mr-2"></i>Crear banda
       </button>
       <button type="button" onclick="closeNewBandModal()"
@@ -268,7 +268,7 @@
 </div>
 
 <div class="max-w-xl mx-auto">
-  <div class="marifa-card p-8">
+  <div class="gigly-card p-8">
     <div class="mb-6">
       <h2 class="font-serif text-2xl text-gray-900 mb-1">
         {% if show %}✏️ Editar Show{% else %}🎤 Nuevo Show{% endif %}
@@ -290,7 +290,7 @@
           </label>
           <input type="text" name="name" id="name"
                  value="{{ form.name.data or '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                  placeholder="Ej: Noche de Cumbia en el Jardín Botánico"
                  required />
           {% if form.name.errors %}
@@ -307,7 +307,7 @@
           </label>
           <input type="date" name="date" id="date"
                  value="{{ form.date.data.strftime('%Y-%m-%d') if form.date.data else '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900"
+                 class="gigly-input w-full px-4 py-3 text-gray-900"
                  required />
           {% if form.date.errors %}
             <span class="text-red-500 text-xs mt-1">{{ form.date.errors[0] }}</span>
@@ -329,7 +329,7 @@
           <div class="location-wrapper" id="venue-wrapper">
             <input type="text" name="venue" id="venue"
                    value="{{ form.venue.data or '' }}"
-                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                    placeholder="Escribí el nombre del lugar..."
                    autocomplete="off" />
 
@@ -349,7 +349,7 @@
           <div class="relative">
             <input type="text" name="city" id="city"
                    value="{{ form.city.data or '' }}"
-                   class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                   class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                    placeholder="Ciudad" />
             <i class="fas fa-check-circle absolute right-3 top-1/2 -translate-y-1/2 text-green-500 text-sm"
                id="city-check" style="display:none;"></i>
@@ -364,7 +364,7 @@
             </span>
           </label>
           <textarea name="general_notes" id="general_notes"
-                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
+                    class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
                     rows="3"
                     placeholder="Observaciones, contactos, indicaciones especiales...">{{ form.general_notes.data or '' }}</textarea>
         </div>
@@ -461,7 +461,7 @@
           </label>
           <div class="flex gap-2">
             <select id="band-preset-select"
-                    class="marifa-input flex-1 px-4 py-3 text-gray-900"
+                    class="gigly-input flex-1 px-4 py-3 text-gray-900"
                     onchange="applyBandPreset(this)">
               <option value="">— Seleccioná una banda —</option>
               <!-- Cargadas por JS -->
@@ -485,7 +485,7 @@
       </div>
 
       <div class="flex gap-3 mt-8">
-        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+        <button type="submit" class="btn btn-gigly flex-1 py-3 font-semibold">
           {% if show %}
             <i class="fas fa-save mr-2"></i>Guardar cambios
           {% else %}
@@ -894,7 +894,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     fetch(`${base}?${params}`, {
-      headers: { 'User-Agent': 'MariFa-App/1.0' }
+      headers: { 'User-Agent': 'Gigly-App/1.0' }
     })
       .then(r => r.json())
       .then(data => {
@@ -908,7 +908,7 @@ document.addEventListener('DOMContentLoaded', function() {
             'accept-language': 'es',
           });
           return fetch(`${base}?${paramsGlobal}`, {
-            headers: { 'User-Agent': 'MariFa-App/1.0' }
+            headers: { 'User-Agent': 'Gigly-App/1.0' }
           }).then(r => r.json());
         }
         return data;

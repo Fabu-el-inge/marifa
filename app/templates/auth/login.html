@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MariFá — Iniciar Sesión</title>
+  <title>Gigly — Iniciar Sesión</title>
 
   <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/marifa.css') }}" />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/gigly.css') }}" />
   <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.7/dist/cdn.min.js"></script>
 </head>
 <body data-theme="light" style="min-height: 100vh; background: linear-gradient(135deg, #fdf8f5 0%, #fce7f3 50%, #ede9fe 100%);">
@@ -54,8 +54,8 @@
       <!-- Logo -->
       <div class="text-center mb-8">
         <div style="font-size: 4rem; line-height: 1; margin-bottom: 4px;"
-             class="marifa-logo-icon">♪</div>
-        <h1 class="marifa-logo" style="font-size: 3.5rem; line-height: 1.1;">MariFá</h1>
+             class="gigly-logo-icon">♪</div>
+        <h1 class="gigly-logo" style="font-size: 3.5rem; line-height: 1.1;">Gigly</h1>
         <p style="color: #9ca3af; font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; margin-top: 8px;">
           Gestión de Setlists
         </p>
@@ -80,7 +80,7 @@
             </label>
             <input type="text" name="username"
                    value="{{ form.username.data or '' }}"
-                   class="marifa-input w-full px-4 py-3"
+                   class="gigly-input w-full px-4 py-3"
                    placeholder="Tu usuario"
                    autocomplete="username" autofocus />
             {% if form.username.errors %}
@@ -94,7 +94,7 @@
               <i class="fas fa-lock mr-2" style="color:#f43f5e;"></i>CONTRASEÑA
             </label>
             <input type="password" name="password"
-                   class="marifa-input w-full px-4 py-3"
+                   class="gigly-input w-full px-4 py-3"
                    placeholder="••••••••"
                    autocomplete="current-password" />
             {% if form.password.errors %}
@@ -112,7 +112,7 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-marifa w-full mt-6 py-3 text-base">
+        <button type="submit" class="btn btn-gigly w-full mt-6 py-3 text-base">
           <i class="fas fa-sign-in-alt mr-2"></i>
           Ingresar
         </button>
@@ -120,7 +120,7 @@
 
       <!-- Footer -->
       <p class="text-center mt-6" style="color:#d1d5db; font-size:0.78rem; letter-spacing:0.05em;">
-        MariFá — Gestión musical
+        Gigly — Gestión musical
       </p>
     </div>
 

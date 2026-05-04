@@ -11,7 +11,7 @@
 
 {% block content %}
 <div class="max-w-xl mx-auto">
-  <div class="marifa-card p-8">
+  <div class="gigly-card p-8">
     <div class="mb-6">
       <h2 class="font-serif text-2xl text-gray-900 mb-1">
         {% if band %}Editar Banda{% else %}Nueva Banda Prearmada{% endif %}
@@ -32,7 +32,7 @@
           </label>
           <input type="text" name="name"
                  value="{{ form.name.data or '' }}"
-                 class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
+                 class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400"
                  placeholder="Ej: Banda de Cumbia, Banda Full, Dúo Acústico"
                  required />
           {% if form.name.errors %}
@@ -49,14 +49,14 @@
             <span class="label-text-alt text-xs text-gray-400">Precio del show con esta banda</span>
           </label>
           <div class="flex gap-2">
-            <select name="currency" class="marifa-input px-3 py-3 text-gray-900" style="flex:0 0 auto; width:auto;">
+            <select name="currency" class="gigly-input px-3 py-3 text-gray-900" style="flex:0 0 auto; width:auto;">
               {% for value, label in form.currency.choices %}
               <option value="{{ value }}" {% if (form.currency.data or 'PYG') == value %}selected{% endif %}>{{ label }}</option>
               {% endfor %}
             </select>
             <input type="number" name="price"
                    value="{{ form.price.data or '' }}"
-                   class="marifa-input flex-1 px-4 py-3 text-gray-900 placeholder-gray-400"
+                   class="gigly-input flex-1 px-4 py-3 text-gray-900 placeholder-gray-400"
                    placeholder="0"
                    min="0" step="1000" />
           </div>
@@ -70,7 +70,7 @@
             </span>
           </label>
           <textarea name="description"
-                    class="marifa-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
+                    class="gigly-input w-full px-4 py-3 text-gray-900 placeholder-gray-400 resize-none"
                     rows="2"
                     placeholder="Ej: Banda completa para eventos grandes, incluye sonido">{{ form.description.data or '' }}</textarea>
         </div>
@@ -130,7 +130,7 @@
       </div>
 
       <div class="flex gap-3 mt-8">
-        <button type="submit" class="btn btn-marifa flex-1 py-3 font-semibold">
+        <button type="submit" class="btn btn-gigly flex-1 py-3 font-semibold">
           {% if band %}
             <i class="fas fa-save mr-2"></i>Guardar cambios
           {% else %}

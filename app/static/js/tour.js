@@ -1,4 +1,4 @@
-/* ===== MariFá Tour & Tutorial ===== */
+/* ===== Gigly Tour & Tutorial ===== */
 
 // ---- Page detection ----
 function detectPage() {
@@ -18,12 +18,12 @@ function detectPage() {
 // ---- Tour definitions ----
 const TOURS = {
   welcome: {
-    key: 'marifa_tour_welcome',
+    key: 'gigly_tour_welcome',
     steps: function() {
       const isMobile = window.innerWidth < 768;
       if (isMobile) {
         return [
-          { element: '.mobile-menu-btn', popover: { title: '¡Bienvenido a MariFá! 🎵', description: 'Tu gestor de setlists para shows en vivo. Desde este menú accedés a todas las secciones.', side: 'bottom' }},
+          { element: '.mobile-menu-btn', popover: { title: '¡Bienvenido a Gigly! 🎵', description: 'Tu gestor de setlists para shows en vivo. Desde este menú accedés a todas las secciones.', side: 'bottom' }},
           { element: '.mobile-bottom-nav a:nth-child(1)', popover: { title: 'Canciones', description: 'Tu catálogo completo: letras, acordes, tonalidades y grabaciones de referencia.', side: 'top' }},
           { element: '.mobile-bottom-nav a:nth-child(2)', popover: { title: 'Shows', description: 'Creá shows y eventos, y armá el setlist para cada uno.', side: 'top' }},
           { element: '.mobile-bottom-nav a:nth-child(3)', popover: { title: 'Bandas', description: 'Armá bandas prearmadas con integrantes y presupuesto.', side: 'top' }},
@@ -31,7 +31,7 @@ const TOURS = {
         ];
       }
       return [
-        { element: '.marifa-logo', popover: { title: '¡Bienvenido a MariFá! 🎵', description: 'Tu gestor de setlists para shows en vivo. Te mostramos cómo funciona.', side: 'right' }},
+        { element: '.gigly-logo', popover: { title: '¡Bienvenido a Gigly! 🎵', description: 'Tu gestor de setlists para shows en vivo. Te mostramos cómo funciona.', side: 'right' }},
         { element: '[data-tour="nav-songs"]', popover: { title: 'Catálogo de Canciones', description: 'Acá gestionás todas tus canciones: letras, acordes, tonalidades, BPM y grabaciones de referencia.', side: 'right' }},
         { element: '[data-tour="nav-shows"]', popover: { title: 'Shows & Eventos', description: 'Creá shows con fecha, lugar y músicos. Desde cada show armás el setlist.', side: 'right' }},
         { element: '[data-tour="nav-bands"]', popover: { title: 'Bandas', description: 'Armá bandas prearmadas con sus integrantes y presupuesto total.', side: 'right' }},
@@ -41,7 +41,7 @@ const TOURS = {
   },
 
   songs: {
-    key: 'marifa_tour_songs',
+    key: 'gigly_tour_songs',
     steps: function() {
       const steps = [
         { element: '[data-tour="add-btn"]', popover: { title: 'Agregar Canciones', description: 'Agregá canciones con título, artista, género, tonalidad, BPM, letra y acordes.', side: 'bottom' }},
@@ -57,7 +57,7 @@ const TOURS = {
   },
 
   shows: {
-    key: 'marifa_tour_shows',
+    key: 'gigly_tour_shows',
     steps: function() {
       const steps = [
         { element: '[data-tour="add-btn"]', popover: { title: 'Crear Shows', description: 'Creá un show con fecha, lugar, ciudad y los músicos que van a tocar.', side: 'bottom' }},
@@ -70,7 +70,7 @@ const TOURS = {
   },
 
   builder: {
-    key: 'marifa_tour_builder',
+    key: 'gigly_tour_builder',
     steps: function() {
       const steps = [];
       if (document.querySelector('#song-count')) {
@@ -87,7 +87,7 @@ const TOURS = {
   },
 
   bands: {
-    key: 'marifa_tour_bands',
+    key: 'gigly_tour_bands',
     steps: function() {
       const steps = [
         { element: '[data-tour="add-btn"]', popover: { title: 'Crear Bandas', description: 'Armá bandas prearmadas con músicos y calculá el presupuesto total.', side: 'bottom' }},
@@ -97,7 +97,7 @@ const TOURS = {
   },
 
   musicians: {
-    key: 'marifa_tour_musicians',
+    key: 'gigly_tour_musicians',
     steps: function() {
       const steps = [
         { element: '[data-tour="add-btn"]', popover: { title: 'Agregar Músicos', description: 'Agregá músicos con instrumento, teléfono y email. Contactalos directo por WhatsApp.', side: 'bottom' }},
@@ -107,7 +107,7 @@ const TOURS = {
   },
 
   song_form: {
-    key: 'marifa_tour_song_form',
+    key: 'gigly_tour_song_form',
     steps: function() {
       const steps = [];
       var yt = document.querySelector('[data-tour="yt-search"]');
@@ -123,7 +123,7 @@ const TOURS = {
   },
 
   show_form: {
-    key: 'marifa_tour_show_form',
+    key: 'gigly_tour_show_form',
     steps: function() {
       const steps = [];
       var name = document.getElementById('name');
@@ -135,7 +135,7 @@ const TOURS = {
   },
 
   band_form: {
-    key: 'marifa_tour_band_form',
+    key: 'gigly_tour_band_form',
     steps: function() {
       const steps = [];
       var name = document.querySelector('input[name="name"]');
@@ -147,7 +147,7 @@ const TOURS = {
   },
 
   musician_form: {
-    key: 'marifa_tour_musician_form',
+    key: 'gigly_tour_musician_form',
     steps: function() {
       const steps = [];
       var name = document.querySelector('input[name="name"]');
@@ -170,7 +170,7 @@ function createDriver(onDone) {
     overlayColor: 'rgba(30, 27, 46, 0.75)',
     stagePadding: 8,
     stageRadius: 16,
-    popoverClass: 'marifa-tour-popover',
+    popoverClass: 'gigly-tour-popover',
     nextBtnText: 'Siguiente →',
     prevBtnText: '← Anterior',
     doneBtnText: '¡Listo!',

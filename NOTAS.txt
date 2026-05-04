@@ -1,17 +1,17 @@
 ==============================
-  MARIFÁ — App de Setlists
+  GIGLY — App de Setlists
 ==============================
 
 ACCESO A LA APP
 ---------------
 URL local:   http://localhost:5000
-Usuario:     marifa
-Email:       marifa@marifa.app
-Contraseña:  marifa2024
+Usuario:     gigly
+Email:       gigly@gigly.app
+Contraseña:  gigly2024
 
 PARA INICIAR LA APP
 -------------------
-1. Abrir terminal en la carpeta: C:\Users\HP\Desktop\sistemas\marife
+1. Abrir terminal en la carpeta: C:\Users\HP\Desktop\sistemas\stelist
 2. Ejecutar: venv\Scripts\python run.py
 3. Abrir en el navegador: http://localhost:5000
 
@@ -20,7 +20,7 @@ PARA INICIAR LA APP
   ESTADO DEL PROYECTO
 ==============================
 
-QUÉ ES MARIFÁ
+QUÉ ES GIGLY
 -----------
 App web para que una cantante gestione setlists.
 - Armás un Show (fecha, venue, ciudad)
@@ -35,20 +35,20 @@ STACK TÉCNICO
 - Base de datos: SQLite (archivo: instance/marifa.db)
 - ORM:       SQLAlchemy + Flask-Migrate
 - Auth:      Flask-Login
-- CSS:       Tailwind CSS + clases custom en app/static/css/marifa.css
+- CSS:       Tailwind CSS + clases custom en app/static/css/gigly.css
 - JS:        Alpine.js + SortableJS (drag & drop) + fetch
 - PDF:       WeasyPrint
 
 ESTRUCTURA DE CARPETAS
 ----------------------
-marifa/
+stelist/
 ├── app/
 │   ├── __init__.py           (app factory)
 │   ├── extensions.py         (db, login_manager, migrate)
 │   ├── models/               (user, song, show, setlist_item)
 │   ├── routes/               (auth, songs, shows, setlist, public)
 │   ├── static/
-│   │   ├── css/marifa.css      (estilos custom)
+│   │   ├── css/gigly.css      (estilos custom)
 │   │   └── js/
 │   │       ├── catalog.js    (búsqueda + drag&drop del builder)
 │   │       └── sortable-init.js
@@ -117,11 +117,12 @@ IDENTIDAD VISUAL
 - Paleta: fondo crema (#fdf8f5), sidebar verde oscuro (#1e3d2f),
           acento rosa (#f43f5e), dorado (#f59e0b), violeta (#7c3aed)
 - Fuentes: Playfair Display (títulos) + Inter (cuerpo)
-- Logo: "MariFá" en cursiva con degradado rosa→dorado
+- Logo: "Gigly" en cursiva con degradado rosa→dorado
 
 IDENTIDAD
 ---------
-La app se llama "MariFá". Carpeta, CSS, base de datos y código: todo dice marifa.
+La app se llama "Gigly". Carpeta, CSS y código dicen gigly.
+NOTA: el archivo de base de datos sigue llamándose marifa.db (legacy, no se renombró).
 
 
 ==============================
@@ -142,14 +143,14 @@ PASOS EN ORDEN
    - En .env cambiar DATABASE_URL a la de Supabase
    - Ejecutar: flask db upgrade (crea las tablas en Supabase)
    - Ejecutar: python seed.py (opcional, para datos de prueba)
-   - Volver a crear el usuario marifa en producción
+   - Volver a crear el usuario gigly en producción
 
 3. Deployar en Railway
    - Crear cuenta en railway.app
    - Nuevo proyecto → conectar repositorio de GitHub
    - Agregar variables de entorno (las del .env)
    - Railway detecta Python automáticamente con gunicorn
-   - La app queda online en una URL tipo marifa.up.railway.app
+   - La app queda online en una URL tipo gigly.up.railway.app
 
 VARIABLES DE ENTORNO PARA PRODUCCIÓN (.env)
 --------------------------------------------
@@ -165,5 +166,5 @@ FLASK_ENV=production
 Cuando abras una nueva sesión, mostrale este archivo completo.
 Con eso ya sabe todo sobre el proyecto y puede ayudarte a continuar.
 
-Decile: "Continuemos con el proyecto MariFá. Te paso las notas:"
+Decile: "Continuemos con el proyecto Gigly. Te paso las notas:"
 y pegá el contenido de este archivo.

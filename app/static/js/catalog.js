@@ -1,5 +1,5 @@
 /**
- * MariFá — Búsqueda AJAX del catálogo en el Builder
+ * Gigly — Búsqueda AJAX del catálogo en el Builder
  */
 
 let searchTimeout = null;
@@ -175,7 +175,7 @@ function renderSongCard(song) {
             ${ytBtn}
             ${recBtn}
             <button onclick="addSongToSetlist(${song.id}, this)"
-                    class="btn btn-sm btn-marifa"
+                    class="btn btn-sm btn-gigly"
                     title="Agregar al setlist"
                     style="min-width:38px; min-height:38px; padding:4px;">
               <i class="fas fa-plus"></i>
@@ -210,7 +210,7 @@ function renderSongCard(song) {
           ${ytBtn}
           ${recBtn}
           <button onclick="addSongToSetlist(${song.id}, this)"
-                  class="btn btn-sm btn-marifa gap-1" title="Agregar al setlist">
+                  class="btn btn-sm btn-gigly gap-1" title="Agregar al setlist">
             <i class="fas fa-plus text-xs"></i>
           </button>
         </div>
@@ -290,11 +290,11 @@ function addSongToSetlist(songId, btnEl, targetIndex, placeholderEl) {
           btnEl.disabled = false;
           btnEl.innerHTML = '<i class="fas fa-check text-xs"></i>';
           btnEl.classList.add('btn-success');
-          btnEl.classList.remove('btn-marifa');
+          btnEl.classList.remove('btn-gigly');
           setTimeout(() => {
             btnEl.innerHTML = '<i class="fas fa-plus text-xs"></i>';
             btnEl.classList.remove('btn-success');
-            btnEl.classList.add('btn-marifa');
+            btnEl.classList.add('btn-gigly');
             btnEl.disabled = false;
           }, 1500);
         }

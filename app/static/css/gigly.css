@@ -1,4 +1,4 @@
-/* ===== MARIFÁ — Rosa & Dorado Elegante ===== */
+/* ===== GIGLY — Rosa & Dorado Elegante ===== */
 
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -35,7 +35,7 @@ h1, h2, h3, .font-serif {
 }
 
 /* ===== LOGO ===== */
-.marifa-logo {
+.gigly-logo {
   font-family: 'Playfair Display', serif;
   font-weight: 900;
   font-style: italic;
@@ -46,7 +46,7 @@ h1, h2, h3, .font-serif {
   letter-spacing: -0.02em;
 }
 
-.marifa-logo-icon {
+.gigly-logo-icon {
   background: linear-gradient(135deg, #f43f5e, #f59e0b);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -133,7 +133,7 @@ h1, h2, h3, .font-serif {
 }
 
 /* ===== CARDS ===== */
-.marifa-card {
+.gigly-card {
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: 20px;
@@ -141,7 +141,7 @@ h1, h2, h3, .font-serif {
   transition: all 0.3s ease;
 }
 
-.marifa-card:hover {
+.gigly-card:hover {
   box-shadow: 0 8px 32px rgba(244,63,94,0.10);
   border-color: #e9d5f5;
 }
@@ -280,7 +280,7 @@ h1, h2, h3, .font-serif {
 }
 
 /* ===== BOTONES ===== */
-.btn-marifa {
+.btn-gigly {
   background: linear-gradient(135deg, #f43f5e, #e11d48);
   color: white !important;
   border: none;
@@ -289,7 +289,7 @@ h1, h2, h3, .font-serif {
   letter-spacing: 0.01em;
 }
 
-.btn-marifa:hover {
+.btn-gigly:hover {
   background: linear-gradient(135deg, #e11d48, #be123c);
   transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(244,63,94,0.35);
@@ -311,7 +311,7 @@ h1, h2, h3, .font-serif {
 }
 
 /* ===== INPUTS ===== */
-.marifa-input {
+.gigly-input {
   background: var(--bg-soft);
   border: 1.5px solid var(--border);
   color: var(--text);
@@ -320,19 +320,19 @@ h1, h2, h3, .font-serif {
   font-family: 'Inter', sans-serif;
 }
 
-.marifa-input:focus {
+.gigly-input:focus {
   border-color: var(--rose);
   outline: none;
   box-shadow: 0 0 0 3px rgba(244,63,94,0.1);
   background: #fff;
 }
 
-.marifa-input::placeholder {
+.gigly-input::placeholder {
   color: var(--muted-2);
 }
 
 /* SELECT */
-select.marifa-input {
+select.gigly-input {
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
@@ -545,20 +545,20 @@ select.marifa-input {
 /* ===== MOBILE RESPONSIVE ===== */
 @media (max-width: 767px) {
   /* Filtros del catálogo: stack vertical */
-  .marifa-card .flex.flex-wrap.gap-3.items-end {
+  .gigly-card .flex.flex-wrap.gap-3.items-end {
     flex-direction: column;
     align-items: stretch;
   }
-  .marifa-card .flex.flex-wrap.gap-3.items-end .flex-1.min-w-48 {
+  .gigly-card .flex.flex-wrap.gap-3.items-end .flex-1.min-w-48 {
     min-width: 0;
     width: 100%;
   }
-  .marifa-card .flex.flex-wrap.gap-3.items-end > div,
-  .marifa-card .flex.flex-wrap.gap-3.items-end > button,
-  .marifa-card .flex.flex-wrap.gap-3.items-end > a {
+  .gigly-card .flex.flex-wrap.gap-3.items-end > div,
+  .gigly-card .flex.flex-wrap.gap-3.items-end > button,
+  .gigly-card .flex.flex-wrap.gap-3.items-end > a {
     width: 100%;
   }
-  .marifa-card .flex.flex-wrap.gap-3.items-end select {
+  .gigly-card .flex.flex-wrap.gap-3.items-end select {
     width: 100%;
   }
 
@@ -570,7 +570,7 @@ select.marifa-input {
   }
 
   /* Setlist card: compact padding */
-  .builder-bg > .flex-1 > .marifa-card {
+  .builder-bg > .flex-1 > .gigly-card {
     padding: 0.5rem !important;
     border-radius: 14px;
   }
