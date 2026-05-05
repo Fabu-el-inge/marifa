@@ -44,6 +44,10 @@ h1, h2, h3, .font-serif {
   -webkit-text-fill-color: transparent;
   background-clip: text;
   letter-spacing: -0.02em;
+  /* Espacio para los descenders (g, y) en cursiva */
+  line-height: 1.25;
+  padding-bottom: 0.1em;
+  display: inline-block;
 }
 
 .gigly-logo-icon {
